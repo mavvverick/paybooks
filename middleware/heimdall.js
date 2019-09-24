@@ -4,7 +4,10 @@ const error = require('http-errors')
 const jwt = require('jsonwebtoken')
 
 const auth = (req, res, next) => {
-  if (req.headers && req.headers.authorization) {
+  if (
+    req.url === '/v1/oauth/init') {
+    return next()
+  } else if (req.headers && req.headers.authorization) {
     // check token validity and next
     const parts = req.headers.authorization.split(' ')
 
