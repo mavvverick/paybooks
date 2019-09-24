@@ -1,0 +1,44 @@
+{
+  "name": "yolo",
+  "version": "1.0.0",
+  "description": "Flight on wheels",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/pathfinder-19N33W/yolo.git"
+  },
+  "keywords": [
+    "yolo",
+    "bus",
+    "online",
+    "booking"
+  ],
+  "author": "Paritosh Gupta",
+  "license": "",
+  "bugs": {
+    "url": "https://gitlab.com/pathfinder-19N33W/yolo/issues"
+  },
+  "homepage": "https://gitlab.com/pathfinder-19N33W/yolo#README",
+  "dependencies": {
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "express-validation": "^1.0.2",
+    "helmet": "^3.21.0",
+    "http-errors": "^1.7.3",
+    "joi": "^14.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "lru-cache": "^5.1.1",
+    "mongoose": "^5.6.12",
+    "mysql2": "^1.7.0",
+    "nanoid": "^2.1.0",
+    "razorpay": "^2.0.5",
+    "redis": "^2.8.0",
+    "sequelize": "^5.18.1"
+  },
+  "devDependencies": {
+    "standard": "^14.1.0"
+  }
+}
