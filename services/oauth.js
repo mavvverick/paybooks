@@ -37,7 +37,9 @@ function initOtp (req, res, next) {
   function _sendOtp () {
     const msg = 'Yolo login otp is ' + otp
     return getOtp(req.body.phone, msg).then(data => {
-      res.json('OK')
+      // TODO
+      // res.json(_resp('OK'))
+      res.json(_resp(otp.toString()))
     })
   }
 }

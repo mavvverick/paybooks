@@ -7,7 +7,6 @@ module.exports = function apiErrorHandler () {
     if (process.env.NODE_ENV === 'dev') {
       console.log(err)
     }
-    console.log(err)
     let status = err.status || err.statusCode || err.code || 500
 
     res.statusCode = status

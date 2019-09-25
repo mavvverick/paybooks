@@ -21,7 +21,6 @@ function search (req, res, next) {
       busData: values[0],
       bookingData: values[1]
     }
-    console.log(data)
     return res.json(data)
   }).catch(err => {
     console.log(err)
@@ -73,8 +72,6 @@ function search (req, res, next) {
       delete query.$and
     }
 
-    console.log(query)
-
     return bus.find(query)
   }
 }
@@ -107,7 +104,7 @@ function _getBookings (where, date) {
   where.day = getUnixTime(date)
   where.status = { [Op.in]: ['INIT', 'PENDING', 'DONE'] }
 
-  return sql.Booking.count({
+  return sql.Seat.count({
     where: where,
     group: ['bId']
   })

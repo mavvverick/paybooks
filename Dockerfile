@@ -3,11 +3,10 @@ From node:8.11.4-alpine as builder
 RUN apk update && \
     apk add git
 
-ARG BUILD_TOKEN
-
 ADD . /workspace
 WORKDIR /workspace
 
+#ARG BUILD_TOKEN
 # RUN sed -i -E "s/git\+ssh:\/\/git/git\+https:\/\/oauth2:"$BUILD_TOKEN"/g" ./package.json
 RUN npm install
 # RUN sed -i -E "s/"$BUILD_TOKEN"/test/g" ./package.json

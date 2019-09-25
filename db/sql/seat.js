@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const Seat = sequelize.define('Seat', {
     name: DataTypes.STRING,
     bId: DataTypes.INTEGER,
+    rId: DataTypes.INTEGER,
     seat: DataTypes.STRING,
     day: DataTypes.INTEGER,
     fare: DataTypes.INTEGER,
