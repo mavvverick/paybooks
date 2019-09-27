@@ -27,6 +27,7 @@ const auth = (req, res, next) => {
       return jwt.verify(token, process.env.TOKEN_SECRET, function (err, accessData) {
         if (accessData) {
           const payload = accessData.payload
+          req.user = {}
           req.user.userId = payload.sub
           req.user.phNumber = payload.phNumber
           req.isAgent = payload.isAgent

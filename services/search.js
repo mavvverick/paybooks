@@ -1,6 +1,9 @@
 const bus = require('../db/mongo/bus')
 const sql = require('../db/sql')
 const Op = sql.Sequelize.Op
+const CError = require('../errors/cError')
+const error = require('http-errors')
+const _resp = require('../lib/resp')
 
 function search (req, res, next) {
   const date = new Date(req.body.date)
@@ -21,9 +24,19 @@ function search (req, res, next) {
       busData: values[0],
       bookingData: values[1]
     }
-    return res.json(data)
+
+    if (data.busData[0].length < 1) {
+      throw new CError({
+        status: 404,
+        message: 'No bus found for this route',
+        name: 'Search',
+        code: 101
+      })
+    }
+
+    return res.json(_resp(data))
   }).catch(err => {
-    console.log(err)
+    return next(error(err))
   })
 
   function _getBuses (query) {
@@ -84,7 +97,17 @@ async function getSeatDetails (req, res, next) {
     const data = {
       booking: values[0]
     }
-    return res.json(data)
+
+    if (values[0].length < 1) {
+      throw new CError({
+        status: 404,
+        message: 'No bus found for this route',
+        name: 'Search',
+        code: 101
+      })
+    }
+
+    return res.json(_resp(data))
   }).catch(err => {
     console.log(err)
   })

@@ -1,9 +1,10 @@
 const CError = require('../errors/cError')
 const sql = require('../db/sql')
 const error = require('http-errors')
+const _resp = require('../lib/resp')
 
 function getProfile (req, res, next) {
-  return res.json(req.user)
+  return res.json(_resp(req.user))
 }
 
 function getMyBookings (req, res, next) {
@@ -36,7 +37,7 @@ function getMyBookings (req, res, next) {
       })))
     }
 
-    res.json(bookings)
+    res.json(_resp(bookings))
   }).catch(err => {
     next(error(err))
   })
