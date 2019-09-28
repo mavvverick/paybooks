@@ -109,7 +109,7 @@ async function getSeatDetails (req, res, next) {
 
     return res.json(_resp(data))
   }).catch(err => {
-    console.log(err)
+    return next(error(err))
   })
 }
 
