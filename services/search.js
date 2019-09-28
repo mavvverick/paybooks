@@ -139,8 +139,8 @@ function _getBookingsByBus (bId, date) {
   }
   where.day = getUnixTime(date)
   where.status = { [Op.in]: ['INIT', 'PENDING', 'DONE'] }
-  return sql.Booking.findAll({
-    attributes: ['seat'],
+  return sql.Seat.findAll({
+    attributes: [['seat', 's']],
     where: where
   }).catch(err => {
     console.log(err)

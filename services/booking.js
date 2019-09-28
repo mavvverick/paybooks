@@ -64,8 +64,6 @@ function commitBooking (req, res, next) {
         },
         transaction: t
       }).then(data => {
-      console.log(data)
-
       if (data[0] === 0) {
         throw new CError({
           status: 404,
