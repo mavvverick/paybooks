@@ -46,8 +46,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     code: DataTypes.STRING,
     meta: DataTypes.STRING,
-    txt: DataTypes.STRING
-
+    txt: DataTypes.STRING,
+    gst: DataTypes.STRING
   }, {
     timestamp: true,
     paranoid: true

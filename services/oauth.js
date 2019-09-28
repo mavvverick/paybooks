@@ -49,7 +49,7 @@ function token (req, res, next) {
     where: {
       phNumber: req.body.phone
     },
-    attributes: ['userId', 'otp', 'isAgent', 'updatedAt']
+    attributes: ['userId', 'otp', 'isAgent', 'phNumber', 'updatedAt']
   }).then(user => {
     if (!user) {
       return next(error(new CError({
@@ -77,8 +77,9 @@ function token (req, res, next) {
       })))
     }
 
+    user.otp = user.otp + '|true'
+    user.save()
     const tokenExp = Math.floor(Date.now() / 1000) + (86400 * 60)
-
     const token = jwt.sign({
       exp: tokenExp, // 60 days expiry
       payload: {

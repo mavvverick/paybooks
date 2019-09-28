@@ -2,12 +2,9 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const busRouteSchema = new Schema({
-  pId: Number,
-  dId: Number,
-  isMain: Boolean,
-  arr: String,
-  dest: String,
-  rkey: String
+  frm: String,
+  whr: String,
+  IsMain: Boolean
 })
 
 const Route = mongoose.model('route', busRouteSchema)

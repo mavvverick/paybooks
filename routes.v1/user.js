@@ -3,7 +3,7 @@ const userService = require('../services/user')
 
 const router = express.Router()
 
-router.get('/', userService.getProfile)
+router.get('/me', userService.getProfile)
 router.get('/bookings', userService.getMyBookings)
 router.post('/ticket/send', userService.sendTicket)
 

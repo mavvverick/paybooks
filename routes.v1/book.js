@@ -9,6 +9,6 @@ const params = require('../serializers/bus')
 const validate = require('express-validation')
 
 router.post('/init', validate(params.initBook), busDetails, calculateFare, bookService.intiBooking)
-router.post('/validate', validate(params.commitBook), bookService.commitBooking)
+router.post('/validate', bookService.commitBooking)
 router.post('/cancel', validate(params.cancel), cancelService.cancel)
 module.exports = router

@@ -1,5 +1,6 @@
 const rzp = require('../config/razorpay')
 const error = require('http-errors')
+const CError = require('../errors/cError')
 const sql = require('../db/sql')
 const _resp = require('../lib/resp')
 
@@ -50,23 +51,36 @@ function commitBooking (req, res, next) {
   //   throw Error('Payment data can not be validated, contact support')
   // }
 
+  const bookId = parseInt(req.body.data.bookId)
+
   return sql.sequelize.transaction(function (t) {
     return sql.Booking.update(
       update,
       {
         where: {
-          bookId: req.body.data.orderId,
-          userId: req.body.data.userId
+          id: bookId,
+          userId: req.user.userId,
+          status: 'INIT'
         },
         transaction: t
       }).then(data => {
+      console.log(data)
+
+      if (data[0] === 0) {
+        throw new CError({
+          status: 404,
+          message: 'No booking found.',
+          name: 'NotFound'
+        })
+      }
+
       return sql.Seat.update(
         {
           status: 'DONE'
         },
         {
           where: {
-            bookId: req.body.data.orderId
+            bookId: bookId
           },
           transaction: t
         }).then(data => {
@@ -75,7 +89,7 @@ function commitBooking (req, res, next) {
         t.rollback()
         throw err
       })
-      // if agent then add comission
+      // TODO if agent then add comission
     })
   }).catch(err => {
     return next(error(err))
@@ -94,7 +108,7 @@ function _serializeBusData (req) {
     userId: req.user.userId,
     mob: req.body.mob,
     bId: req.bus.bId,
-    rId: req.bus.rId,
+    rId: `${req.bus.frm}-${req.bus.whr}`,
     totalFare: req.finalAmnt || req.bus.maxfr,
     dst: req.discount || 0,
     frm: req.bus.frm,
@@ -118,7 +132,8 @@ function _serializeSeatData (req, bookingData) {
       bookId: bookingData.id,
       bId: bookingData.bId,
       bookTime: bookTime,
-      fare: req.bus.maxfr
+      fare: req.bus.maxfr,
+      rId: `${req.bus.frm}-${req.bus.whr}`
     }
   })
 }

@@ -30,7 +30,7 @@ const auth = (req, res, next) => {
           req.user = {}
           req.user.userId = payload.sub
           req.user.phNumber = payload.phNumber
-          req.isAgent = payload.isAgent
+          req.user.isAgent = payload.isAgent
           next()
         } else return next(error(401, err))
       })

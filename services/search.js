@@ -25,7 +25,7 @@ function search (req, res, next) {
       bookingData: values[1]
     }
 
-    if (data.busData[0].length < 1) {
+    if (data.busData.length < 1) {
       throw new CError({
         status: 404,
         message: 'No bus found for this route',
