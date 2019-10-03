@@ -8,16 +8,14 @@ const _resp = require('../lib/resp')
 function search (req, res, next) {
   const date = new Date(req.body.date)
   const dayOfWeek = date.getDay()
-
   const query = {
-    frm: req.body.frm,
-    whr: req.body.whr,
+    rId: req.rId,
     nonOpDays: { $nin: [dayOfWeek] },
     $and: []
   }
 
   const buses = _getBuses(query)
-  const bookings = _getBookings({ rId: `${req.body.frm}-${req.body.whr}` }, date)
+  const bookings = _getBookings({ rId: req.rId }, date)
   // TODO bitlaData = _getDataFromBitlaApi()
   Promise.all([buses, bookings]).then(function (values) {
     const data = {
@@ -28,7 +26,7 @@ function search (req, res, next) {
     if (data.busData.length < 1) {
       throw new CError({
         status: 404,
-        message: 'No bus found for this route',
+        message: 'No bus found for this request',
         name: 'Search',
         code: 101
       })
@@ -85,6 +83,7 @@ function search (req, res, next) {
       delete query.$and
     }
 
+    console.log(query)
     return bus.find(query)
   }
 }
@@ -92,10 +91,10 @@ function search (req, res, next) {
 async function getSeatDetails (req, res, next) {
   // TODO let bitla
   const bookings = await _getBookingsByBus(req.query.bId, req.query.date)
-  // TODO get seat layout data
   Promise.all([bookings]).then(function (values) {
     const data = {
-      booking: values[0]
+      booking: values[0],
+      deck: req.deck
     }
 
     if (values[0].length < 1) {

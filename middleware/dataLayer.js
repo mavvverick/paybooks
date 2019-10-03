@@ -2,7 +2,6 @@ const error = require('http-errors')
 const CError = require('../errors/cError')
 
 const data = (req, res, next) => {
-  console.log(req.body)
   req.data = {}
   req.data.platform = req.headers['x-yolo-platform']
   req.data.device = req.headers['x-yolo-device']

@@ -77,6 +77,7 @@ function cancel (req, res, next) {
         return sql.Refund.create({
           refundId: data.id
         }).then(refund => {
+          // TODO notify BITLA
           return res.json(_resp(refund))
         })
       })

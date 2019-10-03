@@ -15,7 +15,7 @@ async function intiBooking (req, res, next) {
         seats, { transaction: t }
       ).then(data => {
         return rzp.orders.create({
-          amount: booking.totalFare,
+          amount: booking.totalFare * 100,
           currency: 'INR',
           receipt: booking.id,
           payment_capture: 1,
@@ -106,7 +106,7 @@ function _serializeBusData (req) {
     userId: req.user.userId,
     mob: req.body.mob,
     bId: req.bus.bId,
-    rId: `${req.bus.frm}-${req.bus.whr}`,
+    rId: req.bus.rId,
     totalFare: req.finalAmnt || req.bus.maxfr,
     dst: req.discount || 0,
     frm: req.bus.frm,
@@ -115,6 +115,7 @@ function _serializeBusData (req) {
     dPoint: req.drop.name,
     bTime: req.board.eta,
     dTime: req.drop.eta,
+    day: getUnixTime(req.body.date),
     maxCanTime: maxCanTime + (Date.now() / 1000)
   }
 }
@@ -122,16 +123,16 @@ function _serializeBusData (req) {
 function _serializeSeatData (req, bookingData) {
   const bookTime = (Date.now() / 1000) + 10 * 60
 
-  return req.body.bookings.map(booking => {
+  return req.deck.config.map(seat => {
     return {
-      name: booking.name,
+      name: seat.type,
       day: getUnixTime(req.body.date),
-      seat: booking.seat,
+      seat: seat.num,
       bookId: bookingData.id,
       bId: bookingData.bId,
       bookTime: bookTime,
-      fare: req.bus.maxfr,
-      rId: `${req.bus.frm}-${req.bus.whr}`
+      fare: seat.price,
+      rId: req.bus.rId
     }
   })
 }

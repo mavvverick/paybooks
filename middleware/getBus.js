@@ -9,7 +9,7 @@ function getBusData (req, res, next) {
       if (!busDetails) {
         return busModel.findOne({
           bId: req.body.bId
-        }).then(busDetails => {
+        }).lean().then(busDetails => {
           if (!busDetails) {
             return next(error(new CError({
               status: 404,

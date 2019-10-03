@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     dPoint: DataTypes.STRING,
     bTime: DataTypes.INTEGER,
     dTime: DataTypes.INTEGER,
-    seat: DataTypes.STRING,
+    day: DataTypes.INTEGER,
     maxCanTime: DataTypes.INTEGER,
     agentId: DataTypes.STRING,
     comm: DataTypes.STRING,

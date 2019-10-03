@@ -2,6 +2,7 @@ const CError = require('../errors/cError')
 const sql = require('../db/sql')
 const error = require('http-errors')
 const _resp = require('../lib/resp')
+const sendSms = require('../lib/sms')
 
 function getProfile (req, res, next) {
   return res.json(_resp(req.user))
@@ -44,7 +45,28 @@ function getMyBookings (req, res, next) {
 }
 
 function sendTicket (req, res, next) {
-  // send ticket url with code in sms
+  return sql.Booking.findOne({
+    id: req.body.bookId
+  }).then(booking => {
+    if (!booking) {
+      throw new CError({
+        status: 404,
+        message: 'No bookings available.',
+        name: 'NotFound'
+      })
+    }
+    const day = new Date(booking.day)
+    const msg = `PNR: ${booking.id}, ${day}.`
+    // TODO ticket url
+    // TODO ticket message format
+    // `PNR: ${booking.id},Bus:15609,DOJ:22-06-2014,TIME:22:00,3A,GHY TO ROK,RAJAN,B1 35,FARE:1670,SC:22.47+PG CHGS.`
+    return sendSms(req.user.phNumber, msg)
+      .catch(err => {
+        throw err
+      })
+  }).catch(err => {
+    next(error(err))
+  })
 }
 
 function updateProfile (req, res, next) {

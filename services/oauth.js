@@ -1,7 +1,7 @@
 const sql = require('../db/sql')
 const CError = require('../errors/cError')
 const error = require('http-errors')
-const getOtp = require('../lib/otp')
+const sendSms = require('../lib/sms')
 const jwt = require('jsonwebtoken')
 const generate = require('nanoid/generate')
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -29,18 +29,24 @@ function initOtp (req, res, next) {
         return _sendOtp()
       })
     }
-    return _sendOtp()
+    return _sendOtp().then(data => {
+      // TODO
+      // if (data.type === 'success') {
+      //   throw CError({
+      //     status: 404,
+      //     message: data.type,
+      //     name: 'NotFound'
+      //   })
+      // }
+      res.json(_resp(otp.toString()))
+    })
   }).catch(err => {
     next(error(err))
   })
 
   function _sendOtp () {
-    const msg = 'Yolo login otp is ' + otp
-    return getOtp(req.body.phone, msg).then(data => {
-      // TODO
-      // res.json(_resp('OK'))
-      res.json(_resp(otp.toString()))
-    })
+    const msg = 'Yolo Bus app login otp is ' + otp
+    return sendSms(req.body.phone, msg)
   }
 }
 
