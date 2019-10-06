@@ -3,6 +3,7 @@ const sql = require('../db/sql')
 const error = require('http-errors')
 const _resp = require('../lib/resp')
 const sendSms = require('../lib/sms')
+const bus = require('../db/mongo/bus')
 
 function getProfile (req, res, next) {
   return res.json(_resp(req.user))
@@ -69,6 +70,18 @@ function sendTicket (req, res, next) {
   })
 }
 
+function rating (req, res, next) {
+  return bus.updateOne({
+    bId: req.body.bId
+  }, {
+    $inc: { rating: 1 }
+  }).then(data => {
+    res.json('OK')
+  }).catch(err => {
+    next(error(err))
+  })
+}
+
 function updateProfile (req, res, next) {
 
 }
@@ -77,5 +90,6 @@ module.exports = {
   getProfile,
   getMyBookings,
   sendTicket,
-  updateProfile
+  updateProfile,
+  rating
 }

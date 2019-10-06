@@ -1,26 +1,34 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+const seatSchema = new mongoose.Schema({
+  num: String,
+  x: Number,
+  y: Number,
+  typ: String,
+  price: Number,
+  disc: Number,
+  isVert: Boolean
+}, {
+  _id: false,
+  timestamps: false
+})
+
+const stopSchema = new mongoose.Schema({
+  name: String,
+  contact: String,
+  bpTmin: String,
+  eta: String,
+  Landmark: String,
+  Address: String
+}, {
+  _id: false,
+  timestamps: false
+})
 const deckDataSchema = new Schema({
   bId: String,
-  bpData: [{
-    name: String,
-    contact: String,
-    BpTm: String,
-    bpTminmin: Number,
-    eta: Number,
-    Landmark: String,
-    Address: String
-  }],
-  dpData: [{
-    name: String,
-    contact: String,
-    BpTm: String,
-    bpTminmin: Number,
-    eta: Number,
-    Landmark: String,
-    Address: String
-  }],
+  pick: [stopSchema],
+  drop: [stopSchema],
   config: {
     bus: {
       x: {
@@ -34,13 +42,7 @@ const deckDataSchema = new Schema({
     },
     layout: String,
     seats: [{
-      num: String,
-      x: Number,
-      y: Number,
-      type: Number,
-      price: Number,
-      dst: Number,
-      isVert: Boolean
+      type: seatSchema
     }]
   }
 })

@@ -96,15 +96,14 @@ async function getSeatDetails (req, res, next) {
       booking: values[0],
       deck: req.deck
     }
-
-    if (values[0].length < 1) {
-      throw new CError({
-        status: 404,
-        message: 'No bus found for this route',
-        name: 'Search',
-        code: 101
-      })
-    }
+    // if (values[0].length < 1) {
+    //   throw new CError({
+    //     status: 404,
+    //     message: 'No bus found for this route',
+    //     name: 'Search',
+    //     code: 101
+    //   })
+    // }
 
     return res.json(_resp(data))
   }).catch(err => {
@@ -142,7 +141,7 @@ function _getBookingsByBus (bId, date) {
     attributes: [['seat', 's']],
     where: where
   }).catch(err => {
-    console.log(err)
+    throw err
   })
 }
 

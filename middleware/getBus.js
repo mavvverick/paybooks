@@ -19,14 +19,14 @@ function getBusData (req, res, next) {
           }
           cache.setBusDetails(req.body.bId, busDetails)
           req.bus = busDetails
-          filterboardingData(req)
+          // filterboardingData(req)
           return next()
         }).catch(err => {
           next(error(err))
         })
       }
       req.bus = busDetails
-      filterboardingData(req)
+      // filterboardingData(req)
       return next()
     }).catch(err => {
       next(error(err))

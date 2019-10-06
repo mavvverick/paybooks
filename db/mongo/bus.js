@@ -80,7 +80,8 @@ const busSchema = new Schema({
   //   }]
   // },
   maxCanTime: Number,
-  maxReschTime: Number
+  maxReschTime: Number,
+  rating: Number
 })
 
 const Bus = mongoose.model('bus', busSchema)

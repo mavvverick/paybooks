@@ -5,38 +5,39 @@ const sql = require('../db/sql')
 const _resp = require('../lib/resp')
 
 async function intiBooking (req, res, next) {
-  return sql.sequelize.transaction(function (t) {
-    // TODO get bitla booking data
-    const busCreateData = _serializeBusData(req)
+  let busCreateData, seats, bookingData
+  return sql.sequelize.transaction(t => {
+    busCreateData = _serializeBusData(req)
     return sql.Booking.create(busCreateData,
-      { transaction: t }).then(function (booking) {
-      const seats = _serializeSeatData(req, booking)
-      return sql.Seat.bulkCreate(
-        seats, { transaction: t }
-      ).then(data => {
-        return rzp.orders.create({
-          amount: booking.totalFare * 100,
-          currency: 'INR',
-          receipt: booking.id,
-          payment_capture: 1,
-          notes: {
-            user: booking.userId
-          }
-        })
-      }).catch(err => {
-        throw err
-      })
+      { transaction: t }).then(booking => {
+      bookingData = booking
+      seats = _serializeSeatData(req, booking)
+      return sql.Seat.create(seats[0],
+        { transaction: t })
+    })
+  }).then(result => {
+    // Transaction has been committed
+    return rzp.orders.create({
+      amount: bookingData.totalFare * 100,
+      currency: 'INR',
+      receipt: bookingData.id,
+      payment_capture: 1,
+      notes: {
+        user: bookingData.userId
+      }
     }).then(rzpRecord => {
-      sql.Booking.update({
-        orderId: rzpRecord.id
-      }, { where: { id: parseInt(rzpRecord.receipt) } })
+      bookingData.orderId = rzpRecord.id
+      bookingData.save()
       return res.json(_resp(rzpRecord))
-    }).catch(err => {
+    })
+  }).catch(err => {
+    // Transaction has been rolled back
+    if (err.name === 'SequelizeUniqueConstraintError') {
       if (err.errors[0].message === 'seats_seat_day must be unique') {
         return next(error(Error('Seat not available')))
       }
-      next(error(err))
-    })
+    }
+    next(error(err))
   })
 }
 
@@ -102,30 +103,38 @@ module.exports = {
 function _serializeBusData (req) {
   const bookingDateTime = req.body.date + ' ' + req.body.bPoint
   const maxCanTime = getUnixTime(bookingDateTime)
+  const day = getUnixTime(req.body.date)
+  if (day < (Date.now() / 1000)) {
+    throw new CError({
+      status: 404,
+      message: 'Booking date cannot be less than current date.',
+      name: 'NotFound'
+    })
+  }
+
   return {
     userId: req.user.userId,
     mob: req.body.mob,
     bId: req.bus.bId,
     rId: req.bus.rId,
-    totalFare: req.finalAmnt || req.bus.maxfr,
+    totalFare: req.deck.finalAmount,
     dst: req.discount || 0,
     frm: req.bus.frm,
     whr: req.bus.whr,
-    bPoint: req.board.name,
-    dPoint: req.drop.name,
-    bTime: req.board.eta,
-    dTime: req.drop.eta,
-    day: getUnixTime(req.body.date),
+    bPoint: JSON.stringify(req.deck.pick),
+    dPoint: JSON.stringify(req.deck.drop),
+    bTime: req.deck.pick.eta,
+    dTime: req.deck.drop.eta,
+    day: day,
     maxCanTime: maxCanTime + (Date.now() / 1000)
   }
 }
 
 function _serializeSeatData (req, bookingData) {
-  const bookTime = (Date.now() / 1000) + 10 * 60
-
-  return req.deck.config.map(seat => {
+  const bookTime = (Date.now() / 1000)
+  return req.deck.config.bookedSeats.map(seat => {
     return {
-      name: seat.type,
+      name: seat.typ,
       day: getUnixTime(req.body.date),
       seat: seat.num,
       bookId: bookingData.id,
