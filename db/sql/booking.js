@@ -7,35 +7,27 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     mob: DataTypes.STRING,
     bId: DataTypes.INTEGER,
-    rId: DataTypes.STRING,
-    extra: DataTypes.STRING,
-    totalFare: {
+    rId: DataTypes.INTEGER,
+    fare: {
       type: DataTypes.FLOAT,
       allowNull: false,
       defaultValue: 0.00,
       validate: {
         min: 0.00
       }
-    }, // fare
-    refund: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0.00,
-      validate: {
-        min: 0.00
-      }
-    }, // fare
-    dst: DataTypes.INTEGER, // discount
-    frm: DataTypes.STRING,
-    whr: DataTypes.STRING,
-    bPoint: DataTypes.STRING,
-    dPoint: DataTypes.STRING,
-    bTime: DataTypes.INTEGER,
-    dTime: DataTypes.INTEGER,
-    day: DataTypes.INTEGER,
-    maxCanTime: DataTypes.INTEGER,
-    agentId: DataTypes.STRING,
-    comm: DataTypes.STRING,
+    },
+    disc: DataTypes.INTEGER,
+    // frm: DataTypes.STRING,
+    // whr: DataTypes.STRING,
+    // bPoint: DataTypes.STRING,
+    // dPoint: DataTypes.STRING,
+    // bTime: DataTypes.INTEGER,
+    // dTime: DataTypes.INTEGER,
+    // day: DataTypes.INTEGER,
+    // maxCanTime: DataTypes.INTEGER,
+    // agentId: DataTypes.STRING,
+    // comm: DataTypes.STRING,
+    bus: DataTypes.TEXT,
     status: {
       type: DataTypes.ENUM,
       values: [
@@ -44,9 +36,8 @@ module.exports = (sequelize, DataTypes) => {
       ],
       defaultValue: 'INIT'
     },
-    code: DataTypes.STRING,
+    extra: DataTypes.STRING,
     meta: DataTypes.STRING,
-    txt: DataTypes.STRING,
     gst: DataTypes.STRING
   }, {
     timestamp: true,

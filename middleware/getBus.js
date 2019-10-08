@@ -33,10 +33,4 @@ function getBusData (req, res, next) {
     })
 }
 
-function filterboardingData (req) {
-  req.board = req.bus.bpData.filter(board => { return board.name === req.body.bPoint })[0]
-  req.drop = req.bus.dpData.filter(drop => { return drop.name === req.body.dPoint })[0]
-  return req
-}
-
 module.exports = getBusData

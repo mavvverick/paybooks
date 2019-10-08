@@ -14,21 +14,10 @@ const seatSchema = new mongoose.Schema({
   timestamps: false
 })
 
-const stopSchema = new mongoose.Schema({
-  name: String,
-  contact: String,
-  bpTmin: String,
-  eta: String,
-  Landmark: String,
-  Address: String
-}, {
-  _id: false,
-  timestamps: false
-})
 const deckDataSchema = new Schema({
   bId: String,
-  pick: [stopSchema],
-  drop: [stopSchema],
+  name: String,
+  meta: String,
   config: {
     bus: {
       x: {

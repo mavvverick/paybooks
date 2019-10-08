@@ -1,8 +1,21 @@
 const Joi = require('joi')
 
 const booking = {
-  params: {
+  query: {
     filter: Joi.string().required()
+  }
+}
+
+const send = {
+  body: {
+    bookId: Joi.number().required()
+  }
+}
+
+const rate = {
+  body: {
+    bId: Joi.number().required(),
+    rating: Joi.number().required()
   }
 }
 
@@ -14,5 +27,7 @@ const update = {
 
 module.exports = {
   booking,
+  send,
+  rate,
   update
 }

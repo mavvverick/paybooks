@@ -47,11 +47,13 @@ module.exports = getBusData
 function filterSeatData (req) {
   req.deck.config.bookedSeats = []
   req.deck.finalAmount = 0
+  req.deck.disc = 0
   req.body.seats.split(',').forEach(seat => {
     return req.deck.config.seats.forEach(seatData => {
       if (seatData.num === seat) {
         req.deck.config.bookedSeats.push(seatData)
         req.deck.finalAmount += seatData.price
+        req.deck.disc += seatData.disc
       }
     })
   })
@@ -69,10 +71,10 @@ function filterSeatData (req) {
 }
 
 function filterboardingData (req) {
-  req.deck.pick = req.deck.pick.filter(board => { return board.name === req.body.bPoint })[0]
-  req.deck.drop = req.deck.drop.filter(drop => { return drop.name === req.body.dPoint })[0]
+  req.bus.pick = req.bus.pick.filter(board => { return board.name === req.body.bPoint })[0]
+  req.bus.drop = req.bus.drop.filter(drop => { return drop.name === req.body.dPoint })[0]
 
-  if (req.deck.pick === undefined || req.deck.drop === undefined) {
+  if (req.bus.pick === undefined || req.bus.drop === undefined) {
     throw new CError({
       status: 404,
       message: 'No valid stops found.',

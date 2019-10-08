@@ -1,6 +1,18 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+const stopSchema = new mongoose.Schema({
+  name: String,
+  contact: String,
+  bpTmin: String,
+  eta: String,
+  Landmark: String,
+  Address: String
+}, {
+  _id: false,
+  timestamps: false
+})
+
 const busSchema = new Schema({
   bId: String,
   rId: Number,
@@ -38,50 +50,14 @@ const busSchema = new Schema({
     IsSeater: Boolean,
     IsSleeper: Boolean
   },
-  // restStopList: [{
-  //   latLon: String,
-  //   arTime: String,
-  //   locName: String,
-  //   duration: Number
-  // }],
-  // bpData: [{
-  //   name: String,
-  //   BpTm: String,
-  //   bpTminmin: Number,
-  //   eta: Number,
-  //   Landmark: String,
-  //   Address: String
-  // }],
-  // dpData: [{
-  //   name: String,
-  //   BpTm: String,
-  //   bpTminmin: Number,
-  //   eta: Number,
-  //   Landmark: String,
-  //   Address: String
-  // }],
-  // config: {
-  //   layout: String,
-  //   upper: [{
-  //     num: String,
-  //     x: Number,
-  //     y: Number,
-  //     type: Number,
-  //     price: Number,
-  //     isLast: Boolean
-  //   }],
-  //   lower: [{
-  //     num: String,
-  //     x: Number,
-  //     y: Number,
-  //     type: Number,
-  //     price: Number,
-  //     isLast: Boolean
-  //   }]
-  // },
+  pick: [stopSchema],
+  drop: [stopSchema],
   maxCanTime: Number,
   maxReschTime: Number,
-  rating: Number
+  rating: {
+    num: Number,
+    users: Number
+  }
 })
 
 const Bus = mongoose.model('bus', busSchema)

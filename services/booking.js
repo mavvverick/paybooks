@@ -18,7 +18,7 @@ async function intiBooking (req, res, next) {
   }).then(result => {
     // Transaction has been committed
     return rzp.orders.create({
-      amount: bookingData.totalFare * 100,
+      amount: bookingData.fare * 100,
       currency: 'INR',
       receipt: bookingData.id,
       payment_capture: 1,
@@ -112,21 +112,23 @@ function _serializeBusData (req) {
     })
   }
 
+  const busData = {
+    frm: req.bus.frm,
+    whr: req.bus.whr,
+    bPoint: req.bus.pick,
+    dPoint: req.bus.drop
+  }
+
   return {
     userId: req.user.userId,
     mob: req.body.mob,
     bId: req.bus.bId,
     rId: req.bus.rId,
-    totalFare: req.deck.finalAmount,
-    dst: req.discount || 0,
-    frm: req.bus.frm,
-    whr: req.bus.whr,
-    bPoint: JSON.stringify(req.deck.pick),
-    dPoint: JSON.stringify(req.deck.drop),
-    bTime: req.deck.pick.eta,
-    dTime: req.deck.drop.eta,
     day: day,
-    maxCanTime: maxCanTime + (Date.now() / 1000)
+    maxCanTime: maxCanTime + (Date.now() / 1000),
+    fare: req.deck.finalAmount,
+    disc: req.deck.disc,
+    bus: JSON.stringify(busData)
   }
 }
 

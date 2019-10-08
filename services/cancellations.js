@@ -38,6 +38,7 @@ function cancel (req, res, next) {
           [sql.sequelize.fn('count', sql.sequelize.col('id')), 'count']],
         where: {
           bookId: req.body.bookId,
+          userId: req.user.userId,
           seat: {
             [Op.in]: seatList
           },
@@ -56,12 +57,13 @@ function cancel (req, res, next) {
                 }
               },
               transaction: t
-            }).then(function () {
-            return booking.update({
-              refund: sql.sequelize.literal(`refund + ${parseFloat(seatData.total)}`)
-            }, { transaction: t }).then(data => {
-              return [booking, seatData.total]
-            })
+            }).then(function (data) {
+            return [booking, seatData.total]
+            //   return booking.update({
+            //   refund: sql.sequelize.literal(`refund + ${parseFloat(seatData.total)}`)
+            // }, { transaction: t }).then(data => {
+            //   return [booking, seatData.total]
+            // })
           })
         })
     }).then(function (data) {
