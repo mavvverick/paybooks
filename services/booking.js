@@ -31,9 +31,10 @@ async function intiBooking (req, res, next) {
       return res.json(_resp(rzpRecord))
     })
   }).catch(err => {
+    console.log(err.errors[0].validatorKey)
     // Transaction has been rolled back
     if (err.name === 'SequelizeUniqueConstraintError') {
-      if (err.errors[0].message === 'seats_seat_day must be unique') {
+      if (err.errors[0].type === 'unique violation') {
         return next(error(Error('Seat not available')))
       }
     }
@@ -124,6 +125,7 @@ function _serializeBusData (req) {
     mob: req.body.mob,
     bId: req.bus.bId,
     rId: req.bus.rId,
+    seats: req.body.seats,
     day: day,
     maxCanTime: maxCanTime + (Date.now() / 1000),
     fare: req.deck.finalAmount,

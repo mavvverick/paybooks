@@ -28,7 +28,7 @@ function getMyBookings (req, res, next) {
     default:
       status = ['DONE', 'PENDING', 'CANCEL', 'FAILED']
   }
-
+  console.log(req.user.userId)
   return sql.Booking.findAll({
     attributes: {
       exclude: ['deletedAt', 'updatedAt']
@@ -56,7 +56,6 @@ function sendTicket (req, res, next) {
   return sql.Booking.findOne({
     where: {
       id: req.body.bookId,
-      // day: { [Op.gte]: (Date.now() / 1000) },
       status: 'DONE',
       userId: req.user.userId
     }
@@ -68,17 +67,20 @@ function sendTicket (req, res, next) {
         name: 'NotFound'
       })
     }
-    const day = new Date(booking.day)
+
+    const day = new Date(booking.day * 1000)
+    const busData = JSON.parse(booking.bus)
+    const journeyDetails = busData.frm + ' To ' + busData.whr
+    const dateString = day.getDate() + '-' + (day.getMonth() + 1) + '-' + day.getFullYear()
     const pnr = booking.orderId.split('order_')[1]
-    const msg = `PNR: ${pnr}, ${day}.`
+    const msg = `YoloBus:${booking.bId},${journeyDetails} PNR:${pnr},DOJ:${dateString},Time:${busData.bPoint.eta},seats:${booking.seats}`
     // TODO ticket url
     // TODO ticket message format
     // `PNR: ${pnr},Bus:15609,DOJ:22-06-2014,TIME:22:00,3A,GHY TO ROK,RAJAN,B1 35,FARE:1670,SC:22.47+PG CHGS.`
-    // sendSms(req.user.phNumber, msg)
-    //   .catch(err => {
-    //     throw err
-    //   })
-    console.log(msg)
+    sendSms(req.user.phNumber, msg)
+      .catch(err => {
+        throw err
+      })
     res.json(_resp('OK'))
   }).catch(err => {
     next(error(err))
