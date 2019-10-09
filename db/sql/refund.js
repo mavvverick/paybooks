@@ -1,7 +1,8 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Refund = sequelize.define('Refund', {
-    refundId: DataTypes.STRING,
+    refundId: DataTypes.STRING(22),
+    userId: DataTypes.STRING(32),
     text: DataTypes.STRING,
     meta: DataTypes.STRING
   }, {

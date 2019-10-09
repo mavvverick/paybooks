@@ -123,7 +123,10 @@ function rating (req, res, next) {
 }
 
 function refunds (req, res, next) {
-  return sql.Refunds.findAll({
+  return sql.Refund.findAll({
+    attributes: {
+      exclude: ['deletedAt', 'updatedAt']
+    },
     where: {
       userId: req.user.userId
     }

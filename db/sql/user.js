@@ -2,29 +2,29 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     userId: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(32),
       allowNull: false,
       primaryKey: true
     },
     phNumber: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(12),
       unique: true
     },
-    otp: DataTypes.STRING,
+    otp: DataTypes.STRING(50),
     isVerified: DataTypes.BOOLEAN,
     name: DataTypes.STRING,
     firstTimeUser: DataTypes.BOOLEAN,
-    avatarUrl: DataTypes.STRING,
+    avatarUrl: DataTypes.STRING(20),
     isActive: {
-      type: DataTypes.STRING,
+      type: DataTypes.BOOLEAN,
       defaultValue: true
     },
     isBlocked: {
-      type: DataTypes.STRING,
+      type: DataTypes.BOOLEAN,
       defaultValue: false
     },
     androidId: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(75),
       defaultValue: null
     },
     imeiNumber: {
@@ -32,11 +32,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: null
     },
     model: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       defaultValue: null
     },
     referCode: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(24),
       defaultValue: null
     },
     tokens: {
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: null
     },
     gst: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       defaultValue: null
     }
   }, {

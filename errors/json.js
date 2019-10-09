@@ -5,7 +5,7 @@ const statuses = require('statuses')
 module.exports = function apiErrorHandler () {
   return (err, req, res, next) => {
     if (process.env.NODE_ENV === 'dev') {
-    //  console.log(err)
+      console.log(err)
     }
     let status = err.status || err.statusCode || err.code || 500
 

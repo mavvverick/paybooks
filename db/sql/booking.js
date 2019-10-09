@@ -1,12 +1,12 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Booking = sequelize.define('Booking', {
-    userId: DataTypes.STRING,
-    orderId: DataTypes.STRING,
-    paymentId: DataTypes.STRING,
-    seats: DataTypes.STRING,
-    name: DataTypes.STRING,
-    mob: DataTypes.STRING,
+    userId: DataTypes.STRING(32),
+    orderId: DataTypes.STRING(24),
+    paymentId: DataTypes.STRING(24),
+    seats: DataTypes.STRING(32),
+    name: DataTypes.STRING(50),
+    mob: DataTypes.STRING(12),
     bId: DataTypes.INTEGER,
     rId: DataTypes.INTEGER,
     fare: {

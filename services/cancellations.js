@@ -71,14 +71,15 @@ function cancel (req, res, next) {
         }
       }).then(data => {
         return sql.Refund.create({
-          refundId: data.id
+          refundId: data.id,
+          bookId: req.body.bookId,
+          userId: req.user.userId
         }).then(refund => {
           // TODO notify BITLA
           return res.json(_resp(refund.id))
         })
       })
     }).catch(function (err) {
-      console.log(err)
       t.rollback()
       return next(error(err))
     })
