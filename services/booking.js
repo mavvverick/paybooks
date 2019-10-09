@@ -12,7 +12,7 @@ async function intiBooking (req, res, next) {
       { transaction: t }).then(booking => {
       bookingData = booking
       seats = _serializeSeatData(req, booking)
-      return sql.Seat.create(seats[0],
+      return sql.Seat.bulkCreate(seats,
         { transaction: t })
     })
   }).then(result => {
@@ -84,7 +84,7 @@ function commitBooking (req, res, next) {
           },
           transaction: t
         }).then(data => {
-        return res.json(_resp('OK'))
+        return res.json(_resp(bookId))
       }).catch(err => {
         t.rollback()
         throw err

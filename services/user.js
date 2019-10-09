@@ -28,7 +28,6 @@ function getMyBookings (req, res, next) {
     default:
       status = ['DONE', 'PENDING', 'CANCEL', 'FAILED']
   }
-  console.log(req.user.userId)
   return sql.Booking.findAll({
     attributes: {
       exclude: ['deletedAt', 'updatedAt']
@@ -38,7 +37,7 @@ function getMyBookings (req, res, next) {
       status: { [Op.in]: status }
     }
   }).then(bookings => {
-    if (!bookings) {
+    if (bookings.length < 1) {
       return next(error(new CError({
         status: 404,
         message: 'No bookings available.',
@@ -47,6 +46,30 @@ function getMyBookings (req, res, next) {
     }
 
     res.json(_resp(bookings))
+  }).catch(err => {
+    next(error(err))
+  })
+}
+
+function getBookingById (req, res, next) {
+  return sql.Booking.findOne({
+    attributes: {
+      exclude: ['deletedAt', 'updatedAt']
+    },
+    where: {
+      id: req.params.bookId,
+      userId: req.user.userId
+    }
+  }).then(booking => {
+    if (!booking) {
+      return next(error(new CError({
+        status: 404,
+        message: 'No booking available.',
+        name: 'NotFound'
+      })))
+    }
+
+    res.json(_resp(booking))
   }).catch(err => {
     next(error(err))
   })
@@ -99,6 +122,26 @@ function rating (req, res, next) {
   })
 }
 
+function refunds (req, res, next) {
+  return sql.Refunds.findAll({
+    where: {
+      userId: req.user.userId
+    }
+  }).then(refunds => {
+    if (refunds.length < 1) {
+      return next(error(new CError({
+        status: 404,
+        message: 'No refunds available.',
+        name: 'NotFound'
+      })))
+    }
+
+    res.json(_resp(refunds))
+  }).catch(err => {
+    next(error(err))
+  })
+}
+
 function updateProfile (req, res, next) {
 
 }
@@ -106,7 +149,9 @@ function updateProfile (req, res, next) {
 module.exports = {
   getProfile,
   getMyBookings,
+  getBookingById,
   sendTicket,
   updateProfile,
-  rating
+  rating,
+  refunds
 }

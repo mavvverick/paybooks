@@ -6,6 +6,12 @@ const booking = {
   }
 }
 
+const bookDetail = {
+  params: {
+    bookId: Joi.number().required()
+  }
+}
+
 const send = {
   body: {
     bookId: Joi.number().required()
@@ -27,6 +33,7 @@ const update = {
 
 module.exports = {
   booking,
+  bookDetail,
   send,
   rate,
   update
