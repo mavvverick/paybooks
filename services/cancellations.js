@@ -65,7 +65,7 @@ function cancel (req, res, next) {
               },
               transaction: t
             }).then(function (data) {
-            const amntInPaise = seatData * 100
+            const amntInPaise = seatData.total * 100
             return rzp.payments.refund(booking.paymentId, {
               amount: amntInPaise,
               notes: {
