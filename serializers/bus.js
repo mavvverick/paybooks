@@ -5,10 +5,10 @@ const search = {
     frm: Joi.string().required(),
     whr: Joi.string().required(),
     date: Joi.string().required(),
-    dTimes: Joi.string(),
-    aTimes: Joi.string(),
-    bc: Joi.string(),
-    amenities: Joi.string()
+    dTimes: Joi.array(),
+    aTimes: Joi.array(),
+    bc: Joi.array(),
+    amenities: Joi.array()
   }
 }
 

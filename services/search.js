@@ -39,10 +39,10 @@ function search (req, res, next) {
 
   function _getBuses (query) {
     const timeConf = {
-      a: { gte: 0, lte: 600 },
-      b: { gte: 600, lte: 1200 },
-      c: { gte: 1200, lte: 1800 },
-      d: { gte: 1800, lte: 2400 }
+      a: { $gte: 0, $lte: 600 },
+      b: { $gte: 600, $lte: 1200 },
+      c: { $gte: 1200, $lte: 1800 },
+      d: { $gte: 1800, $lte: 2400 }
     }
 
     const dtimes = []
@@ -51,7 +51,7 @@ function search (req, res, next) {
     const amnt = []
 
     if (req.body.hasOwnProperty('dTimes')) {
-      req.body.dTimes.split(',').forEach(interval => {
+      req.body.dTimes.forEach(interval => {
         dtimes.push({ dt: timeConf[interval] })
       })
 
@@ -59,14 +59,14 @@ function search (req, res, next) {
     }
 
     if (req.body.hasOwnProperty('aTimes')) {
-      req.body.aTimes.split(',').forEach(interval => {
+      req.body.aTimes.forEach(interval => {
         atimes.push({ at: timeConf[interval] })
       })
       query.$and.push({ $or: atimes })
     }
 
     if (req.body.hasOwnProperty('bc')) {
-      req.body.bc.split(',').forEach(cat => {
+      req.body.bc.forEach(cat => {
         const dd = {}
         const key = 'bc.' + cat
         dd[key] = true
@@ -76,14 +76,14 @@ function search (req, res, next) {
     }
 
     if (req.body.hasOwnProperty('amenities')) {
-      query.$and.push({ amnt: { $all: req.body.amenities.split(',') } })
+      query.$and.push({ amnt: { $all: req.body.amenities } })
     }
 
     if (query.$and.length < 1) {
       delete query.$and
     }
 
-    console.log(query)
+    // console.log(JSON.stringify(query))
     return bus.find(query)
   }
 }
