@@ -95,7 +95,15 @@ function token (req, res, next) {
       }
     }, process.env.TOKEN_SECRET)
 
-    res.json(_resp({ token: token, expInSec: tokenExp }))
+    res.json(_resp({
+      token: token,
+      expInSec: tokenExp,
+      user: {
+        sub: user.userId,
+        phNumber: user.phNumber,
+        isAgent: user.isAgent
+      }
+    }))
   })
 }
 
