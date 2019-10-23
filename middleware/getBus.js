@@ -19,7 +19,6 @@ function getBusData (req, res, next) {
           }
           cache.setBusDetails(req.body.bId, busDetails)
           req.bus = busDetails
-          req.busSerializedData = _serializeBusData(req)
           // filterboardingData(req)
           return next()
         }).catch(err => {
