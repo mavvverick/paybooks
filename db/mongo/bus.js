@@ -43,7 +43,11 @@ const busSchema = new Schema({
   amnt: [String],
   busImageCount: Number,
   maxfr: Number,
-  maxseat: Number,
+  disc: {
+    type: Number,
+    default: 0
+  },
+  maxSeat: Number,
   bc: {
     IsAc: Boolean,
     IsNonAc: Boolean,

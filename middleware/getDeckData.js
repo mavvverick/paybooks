@@ -21,7 +21,7 @@ function getBusData (req, res, next) {
 
           cache.setDeckData(req.body.bId, deckDetails)
           req.deck = deckDetails
-          if (req.url === '/init') {
+          if (req.url === '/init' || req.url === '/book') {
             filterSeatData(req)
             filterboardingData(req)
           }
@@ -32,7 +32,7 @@ function getBusData (req, res, next) {
         })
       }
       req.deck = deckDetails
-      if (req.url === '/init') {
+      if (req.url === '/init' || req.url === '/book') {
         filterSeatData(req)
         filterboardingData(req)
       }
@@ -57,7 +57,6 @@ function filterSeatData (req) {
       }
     })
   })
-
   if (req.deck.config.bookedSeats.length < 1) {
     throw new CError({
       status: 404,
@@ -67,6 +66,8 @@ function filterSeatData (req) {
   }
 
   delete req.deck.config.seats
+  req.busSerializedData.fare = req.deck.finalAmount
+  req.busSerializedData.disc = req.deck.disc
   return req
 }
 

@@ -4,11 +4,11 @@ const CError = require('../errors/cError')
 const sql = require('../db/sql')
 const _resp = require('../lib/resp')
 
-async function intiBooking (req, res, next) {
-  let busCreateData, seats, bookingData
+async function initBooking (req, res, next) {
+  let seats, bookingData
   return sql.sequelize.transaction(t => {
-    busCreateData = _serializeBusData(req)
-    return sql.Booking.create(busCreateData,
+    // busCreateData = _serializeBusData(req)
+    return sql.Booking.create(req.busSerializedData,
       { transaction: t }).then(booking => {
       bookingData = booking
       seats = _serializeSeatData(req, booking)
@@ -16,20 +16,24 @@ async function intiBooking (req, res, next) {
         { transaction: t })
     })
   }).then(result => {
-    // Transaction has been committed
-    return rzp.orders.create({
-      amount: bookingData.fare * 100,
-      currency: 'INR',
-      receipt: bookingData.id,
-      payment_capture: 1,
-      notes: {
-        user: bookingData.userId
-      }
-    }).then(rzpRecord => {
-      bookingData.orderId = rzpRecord.id
-      bookingData.save()
-      return res.json(_resp(rzpRecord))
-    })
+    if (req.user.isAgent) {
+      return res.json(_resp(result))
+    } else {
+      // Transaction has been committed
+      return rzp.orders.create({
+        amount: bookingData.fare * 100,
+        currency: 'INR',
+        receipt: bookingData.id,
+        payment_capture: 1,
+        notes: {
+          user: bookingData.userId
+        }
+      }).then(rzpRecord => {
+        bookingData.orderId = rzpRecord.id
+        bookingData.save()
+        return res.json(_resp(rzpRecord))
+      })
+    }
   }).catch(err => {
     console.log(err.errors[0].validatorKey)
     // Transaction has been rolled back
@@ -97,42 +101,42 @@ function commitBooking (req, res, next) {
 }
 
 module.exports = {
-  intiBooking,
+  initBooking,
   commitBooking
 }
 
-function _serializeBusData (req) {
-  const bookingDateTime = req.body.date + ' ' + req.body.bPoint
-  const maxCanTime = getUnixTime(bookingDateTime)
-  const day = getUnixTime(req.body.date)
-  if (day < (Date.now() / 1000)) {
-    throw new CError({
-      status: 404,
-      message: 'Booking date cannot be less than current date.',
-      name: 'NotFound'
-    })
-  }
+// function _serializeBusData (req) {
+//   const bookingDateTime = req.body.date + ' ' + req.body.bPoint
+//   const maxCanTime = getUnixTime(bookingDateTime)
+//   const day = getUnixTime(req.body.date)
+//   if (day < (Date.now() / 1000)) {
+//     throw new CError({
+//       status: 404,
+//       message: 'Booking date cannot be less than current date.',
+//       name: 'NotFound'
+//     })
+//   }
 
-  const busData = {
-    frm: req.bus.frm,
-    whr: req.bus.whr,
-    bPoint: req.bus.pick,
-    dPoint: req.bus.drop
-  }
+//   const busData = {
+//     frm: req.bus.frm,
+//     whr: req.bus.whr,
+//     bPoint: req.bus.pick,
+//     dPoint: req.bus.drop
+//   }
 
-  return {
-    userId: req.user.userId,
-    mob: req.body.mob,
-    bId: req.bus.bId,
-    rId: req.bus.rId,
-    seats: req.body.seats,
-    day: day,
-    maxCanTime: maxCanTime + (Date.now() / 1000),
-    fare: req.deck.finalAmount,
-    disc: req.deck.disc,
-    bus: JSON.stringify(busData)
-  }
-}
+//   return {
+//     userId: req.user.userId,
+//     mob: req.body.mob,
+//     bId: req.bus.bId,
+//     rId: req.bus.rId,
+//     seats: req.body.seats,
+//     day: day,
+//     maxCanTime: maxCanTime + (Date.now() / 1000),
+//     fare: req.deck.finalAmount,
+//     disc: req.deck.disc,
+//     bus: JSON.stringify(busData)
+//   }
+// }
 
 function _serializeSeatData (req, bookingData) {
   const bookTime = (Date.now() / 1000)

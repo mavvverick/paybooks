@@ -40,7 +40,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: null
     },
     tokens: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
+      defaultValue: 0
+    },
+    amount: {
+      type: DataTypes.FLOAT,
       defaultValue: 0
     },
     isAgent: {

@@ -5,6 +5,7 @@ const busRoutes = require('./bus')
 const bookRoutes = require('./book')
 const supportRoutes = require('./support')
 const userRoutes = require('./user')
+const agentRoutes = require('./agent')
 const heimdall = require('../middleware/heimdall')
 
 /** GET /health-check - Check service health */
@@ -24,5 +25,5 @@ router.use('/bus', busRoutes)
 router.use('/book', authMiddleware, bookRoutes)
 router.use('/support', authMiddleware, supportRoutes)
 router.use('/user', authMiddleware, userRoutes)
-
+router.use('/agent', authMiddleware, agentRoutes)
 module.exports = router
