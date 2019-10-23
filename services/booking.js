@@ -35,7 +35,6 @@ async function initBooking (req, res, next) {
       })
     }
   }).catch(err => {
-    console.log(err.errors[0].validatorKey)
     // Transaction has been rolled back
     if (err.name === 'SequelizeUniqueConstraintError') {
       if (err.errors[0].type === 'unique violation') {

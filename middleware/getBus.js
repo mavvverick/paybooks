@@ -27,7 +27,6 @@ function getBusData (req, res, next) {
         })
       }
       req.bus = busDetails
-      req.busSerializedData = _serializeBusData(req)
       // filterboardingData(req)
       return next()
     }).catch(err => {
@@ -36,39 +35,3 @@ function getBusData (req, res, next) {
 }
 
 module.exports = getBusData
-
-function _serializeBusData (req) {
-  const bookingDateTime = req.body.date + ' ' + req.body.bPoint
-  const maxCanTime = getUnixTime(bookingDateTime)
-  const day = getUnixTime(req.body.date) + 86400
-
-  if (day < (Date.now() / 1000)) {
-    throw new CError({
-      status: 404,
-      message: 'Booking date cannot be less than current date.',
-      name: 'NotFound'
-    })
-  }
-
-  const busData = {
-    frm: req.bus.frm,
-    whr: req.bus.whr,
-    bPoint: req.bus.pick,
-    dPoint: req.bus.drop
-  }
-
-  return {
-    userId: req.user.userId,
-    mob: req.body.mob,
-    bId: req.bus.bId,
-    rId: req.bus.rId,
-    seats: req.body.seats,
-    day: day,
-    maxCanTime: maxCanTime + (Date.now() / 1000),
-    bus: JSON.stringify(busData)
-  }
-}
-
-function getUnixTime (dateStr) {
-  return new Date(dateStr).getTime() / 1000 | 0
-}

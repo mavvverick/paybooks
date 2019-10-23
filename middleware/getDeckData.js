@@ -24,6 +24,7 @@ function getBusData (req, res, next) {
           if (req.url === '/init' || req.url === '/book') {
             filterSeatData(req)
             filterboardingData(req)
+            _serializeBusData(req)
           }
 
           return next()
@@ -35,6 +36,7 @@ function getBusData (req, res, next) {
       if (req.url === '/init' || req.url === '/book') {
         filterSeatData(req)
         filterboardingData(req)
+        _serializeBusData(req)
       }
       return next()
     }).catch(err => {
@@ -66,8 +68,6 @@ function filterSeatData (req) {
   }
 
   delete req.deck.config.seats
-  req.busSerializedData.fare = req.deck.finalAmount
-  req.busSerializedData.disc = req.deck.disc
   return req
 }
 
@@ -83,4 +83,44 @@ function filterboardingData (req) {
     })
   }
   return req
+}
+
+function _serializeBusData (req) {
+  const bookingDateTime = req.body.date + ' ' + req.body.bPoint
+  const maxCanTime = getUnixTime(bookingDateTime)
+  const day = getUnixTime(req.body.date) + 86400
+
+  if (day < (Date.now() / 1000)) {
+    throw new CError({
+      status: 404,
+      message: 'Booking date cannot be less than current date.',
+      name: 'NotFound'
+    })
+  }
+
+  const busData = {
+    frm: req.bus.frm,
+    whr: req.bus.whr,
+    bPoint: req.bus.pick,
+    dPoint: req.bus.drop
+  }
+
+  req.busSerializedData = {
+    userId: req.user.userId,
+    mob: req.body.mob,
+    bId: req.bus.bId,
+    rId: req.bus.rId,
+    seats: req.body.seats,
+    day: day,
+    maxCanTime: maxCanTime + (Date.now() / 1000),
+    fare: req.deck.finalAmount,
+    disc: req.deck.disc,
+    bus: JSON.stringify(busData)
+  }
+
+  return req
+}
+
+function getUnixTime (dateStr) {
+  return new Date(dateStr).getTime() / 1000 | 0
 }
