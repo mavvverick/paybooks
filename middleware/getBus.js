@@ -40,7 +40,8 @@ module.exports = getBusData
 function _serializeBusData (req) {
   const bookingDateTime = req.body.date + ' ' + req.body.bPoint
   const maxCanTime = getUnixTime(bookingDateTime)
-  const day = getUnixTime(req.body.date)
+  const day = getUnixTime(req.body.date) + 86400
+
   if (day < (Date.now() / 1000)) {
     throw new CError({
       status: 404,

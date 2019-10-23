@@ -42,7 +42,7 @@ const dummyUser = (req, res, next) => {
   const users = [{
     userId: 'ANON1',
     phNumber: '9315612997',
-    isAgent: true
+    isAgent: false
   }, {
     userId: 'ANON2',
     phNumber: '9087654321',
