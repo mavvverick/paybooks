@@ -100,7 +100,7 @@ function initBooking (req, res, next) {
       transaction: t,
       lock: t.LOCK.UPDATE
     }).then(userData => {
-      console.log(req.deck.finalAmount)
+      // TODO add comission
       if (userData.amount <= req.deck.finalAmount) {
         throw Error('Low wallet balance')
       }
@@ -127,24 +127,7 @@ function initBooking (req, res, next) {
       })
     })
   }).then(result => {
-    if (req.user.isAgent) {
-      return res.json(_resp(result))
-    } else {
-      // Transaction has been committed
-      return rzp.orders.create({
-        amount: bookingData.fare * 100,
-        currency: 'INR',
-        receipt: bookingData.id,
-        payment_capture: 1,
-        notes: {
-          user: bookingData.userId
-        }
-      }).then(rzpRecord => {
-        bookingData.orderId = rzpRecord.id
-        bookingData.save()
-        return res.json(_resp(rzpRecord))
-      })
-    }
+    return res.json(_resp(result))
   }).catch(err => {
     // Transaction has been rolled back
     if (err.name === 'SequelizeUniqueConstraintError') {
