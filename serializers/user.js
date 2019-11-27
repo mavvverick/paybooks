@@ -8,13 +8,13 @@ const booking = {
 
 const bookDetail = {
   params: {
-    bookId: Joi.number().required()
+    bookId: Joi.string().required()
   }
 }
 
 const send = {
   body: {
-    bookId: Joi.number().required()
+    bookId: Joi.string().required()
   }
 }
 

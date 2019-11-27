@@ -2,8 +2,8 @@ const Joi = require('joi')
 
 const search = {
   body: {
-    frm: Joi.string().required(),
-    whr: Joi.string().required(),
+    frm: Joi.number().required(),
+    whr: Joi.number().required(),
     date: Joi.string().required(),
     dTimes: Joi.array(),
     aTimes: Joi.array(),
@@ -12,17 +12,26 @@ const search = {
   }
 }
 
+var contactSchema = Joi.object().keys({
+  mobile_number: Joi.string().required(),
+  emergency_name: Joi.string().required(),
+  email: Joi.string().required()
+})
+
+var gstSchema = Joi.object().keys({
+  name: Joi.string(),
+  gst_id: Joi.string(),
+  address: Joi.string()
+})
+
 const initBook = {
   body: {
-    bId: Joi.number().required(),
-    date: Joi.string().required(),
-    bookings: Joi.array().required(),
+    sId: Joi.number().required(),
     seats: Joi.string().required(),
-    name: Joi.string().required(),
-    mob: Joi.string().required(),
-    bPoint: Joi.string().required(),
-    dPoint: Joi.string().required(),
-    gst: Joi.string()
+    boarding_at: Joi.string().required(),
+    drop_of: Joi.string().required(),
+    contact: contactSchema.required(),
+    gst: gstSchema
   }
 }
 
@@ -38,14 +47,13 @@ const commitBook = {
 
 const seats = {
   query: {
-    bId: Joi.string().required(),
-    date: Joi.string().required()
+    sid: Joi.number().required()
   }
 }
 
 const cancel = {
   body: {
-    bookId: Joi.number().required(),
+    ticket_number: Joi.string().required(),
     seats: Joi.string().required()
   }
 }

@@ -5,38 +5,17 @@ const error = require('http-errors')
 const _resp = require('../lib/resp')
 const sendSms = require('../lib/sms')
 const bus = require('../db/mongo/bus')
+const bookModel = require('../db/mongo/bookings')
+const bookParams = require('../utils/bookschema')
 
 function getProfile (req, res, next) {
   return res.json(_resp(req.user))
 }
 
 function getMyBookings (req, res, next) {
-  let status = null
-  switch (req.query.filter) {
-    case 'all':
-      status = ['DONE', 'PENDING', 'CANCEL', 'FAILED']
-      break
-    case 'pending':
-      status = ['PENDING']
-      break
-    case 'cancel':
-      status = ['CANCEL']
-      break
-    case 'failed':
-      status = ['FAILED']
-      break
-    default:
-      status = ['DONE', 'PENDING', 'CANCEL', 'FAILED']
-  }
-  return sql.Booking.findAll({
-    attributes: {
-      exclude: ['deletedAt', 'updatedAt']
-    },
-    where: {
-      userId: req.user.userId,
-      status: { [Op.in]: status }
-    }
-  }).then(bookings => {
+  return bookModel.find({
+    userId: req.user.userId
+  }).select(bookParams).then(bookings => {
     if (bookings.length < 1) {
       return next(error(new CError({
         status: 404,
@@ -44,7 +23,6 @@ function getMyBookings (req, res, next) {
         name: 'NotFound'
       })))
     }
-
     res.json(_resp(bookings))
   }).catch(err => {
     next(error(err))
@@ -52,62 +30,53 @@ function getMyBookings (req, res, next) {
 }
 
 function getBookingById (req, res, next) {
-  return sql.Booking.findOne({
-    attributes: {
-      exclude: ['deletedAt', 'updatedAt']
-    },
-    where: {
-      id: req.params.bookId,
-      userId: req.user.userId
-    }
-  }).then(booking => {
-    if (!booking) {
-      return next(error(new CError({
-        status: 404,
-        message: 'No booking available.',
-        name: 'NotFound'
-      })))
-    }
-
-    res.json(_resp(booking))
-  }).catch(err => {
-    next(error(err))
-  })
+  return bookModel.find({
+    ticket_number: req.params.bookId,
+    userId: req.user.userId
+  }).select(bookParams)
+    .then(booking => {
+      if (!booking) {
+        return next(error(new CError({
+          status: 404,
+          message: 'No booking available.',
+          name: 'NotFound'
+        })))
+      }
+      res.json(_resp(booking))
+    }).catch(err => {
+      next(error(err))
+    })
 }
 
 function sendTicket (req, res, next) {
-  return sql.Booking.findOne({
-    where: {
-      id: req.body.bookId,
-      status: 'DONE',
-      userId: req.user.userId
-    }
-  }).then(booking => {
-    if (!booking) {
-      throw new CError({
-        status: 404,
-        message: 'No active bookings available.',
-        name: 'NotFound'
-      })
-    }
+  return bookModel.findOne({
+    ticket_number: req.body.bookId,
+    userId: req.user.userId
+  }).select(bookParams)
+    .then(booking => {
+      if (!booking) {
+        throw new CError({
+          status: 404,
+          message: 'No active bookings available.',
+          name: 'NotFound'
+        })
+      }
+      const day = new Date(booking.travel_date)
+      const journeyDetails = booking.origin + ' To ' + booking.destination
+      const dateString = day.getDate() + '-' + (day.getMonth() + 1) + '-' + day.getFullYear()
+      const msg = `YoloBus:${booking.ticket_number},${journeyDetails} PNR:YO-${booking.operator_pnr},DOJ:${dateString},Time:${booking.dep_time},seats:${booking.seat_numbers}`
 
-    const day = new Date(booking.day * 1000)
-    const busData = JSON.parse(booking.bus)
-    const journeyDetails = busData.frm + ' To ' + busData.whr
-    const dateString = day.getDate() + '-' + (day.getMonth() + 1) + '-' + day.getFullYear()
-    const pnr = booking.orderId.split('order_')[1]
-    const msg = `YoloBus:${booking.bId},${journeyDetails} PNR:${pnr},DOJ:${dateString},Time:${busData.bPoint.eta},seats:${booking.seats}`
-    // TODO ticket url
-    // TODO ticket message format
-    // `PNR: ${pnr},Bus:15609,DOJ:22-06-2014,TIME:22:00,3A,GHY TO ROK,RAJAN,B1 35,FARE:1670,SC:22.47+PG CHGS.`
-    sendSms(req.user.phNumber, msg)
-      .catch(err => {
-        throw err
-      })
-    res.json(_resp('OK'))
-  }).catch(err => {
-    next(error(err))
-  })
+      // TODO ticket url
+      // TODO ticket message format
+      // `PNR: ${pnr},Bus:15609,DOJ:22-06-2014,TIME:22:00,3A,GHY TO ROK,RAJAN,B1 35,FARE:1670,SC:22.47+PG CHGS.`
+      sendSms(req.user.phNumber, msg)
+        .catch(err => {
+          throw err
+        })
+      res.json(_resp('OK'))
+    }).catch(err => {
+      next(error(err))
+    })
 }
 
 function rating (req, res, next) {

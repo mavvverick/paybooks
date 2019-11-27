@@ -8,7 +8,7 @@ const params = require('../serializers/bus')
 const validate = require('express-validation')
 
 router.post('/search', validate(params.search), routeChecker, searchService.search)
-router.get('/seat', validate(params.seats), deckData, searchService.getSeatDetails)
+router.get('/seat', validate(params.seats), searchService.available)
 router.get('/cities', cityService.cities)
 
 module.exports = router

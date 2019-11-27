@@ -1,150 +1,72 @@
-const bus = require('../db/mongo/bus')
-const sql = require('../db/sql')
-const Op = sql.Sequelize.Op
 const CError = require('../errors/cError')
 const error = require('http-errors')
 const _resp = require('../lib/resp')
-
+const scheduleModel = require('../db/mongo/schedule')
+const api = require('../lib/bitla')
+const scheduleParams = require('../utils/scheduleSchema')
 function search (req, res, next) {
-  const date = new Date(req.body.date)
-  const dayOfWeek = date.getDay()
-  const query = {
-    rId: req.rId,
-    nonOpDays: { $nin: [dayOfWeek] },
-    $and: []
-  }
+  // TODO Elastic search with listing data
+  const dt = new Date(req.body.date)
+  return scheduleModel.find({
+    travel_date: dt,
+    hash: '' + req.body.frm + req.body.whr
+  }).select(scheduleParams)
+    .lean()
+    .then(data => {
+      res.json(_resp(data))
+    }).catch(err => {
+      next(error(err))
+    })
+}
 
-  const buses = _getBuses(query)
-  const bookings = _getBookings({ rId: req.rId }, date)
-  // TODO bitlaData = _getDataFromBitlaApi()
-  Promise.all([buses, bookings]).then(function (values) {
-    const data = {
-      busData: values[0],
-      bookingData: values[1]
-    }
-
-    if (data.busData.length < 1) {
-      throw new CError({
+function available (req, res, next) {
+  // TODO check travel date gte than current date
+  return scheduleModel.findOne({
+    travel_date: { $gte: Date.now() },
+    id: req.query.sid
+  }).select({
+    _id: 0,
+    'bus_layout.total_seats': 1,
+    'bus_layout.coach_details': 1,
+    'bus_layout.boarding_stages': 1,
+    'bus_layout.dropoff_stages': 1
+  }).lean().then(schedule => {
+    if (!schedule) {
+      return next(error(new CError({
         status: 404,
-        message: 'No bus found for this request',
-        name: 'Search',
-        code: 101
-      })
+        message: 'No schedule found.',
+        name: 'NotFound'
+      })))
     }
-
-    return res.json(_resp(data))
+    return api('availability', req.query.sid)
+      .then(data => {
+        schedule.available = {
+          num: data.result[1][2],
+          seats: data.result[1][9],
+          ladies: data.result[1][10],
+          gents: data.result[1][11]
+        }
+        return res.json(_resp(schedule))
+      })
   }).catch(err => {
-    return next(error(err))
+    next(error(err))
   })
 
-  function _getBuses (query) {
-    const timeConf = {
-      a: { $gte: 0, $lte: 600 },
-      b: { $gte: 600, $lte: 1200 },
-      c: { $gte: 1200, $lte: 1800 },
-      d: { $gte: 1800, $lte: 2400 }
-    }
+  // return api('availability', req.query.sid)
+  //   .then(data => {
+  //     const avaialble = {
+  //       fare: data.result[1][4],
+  //       seats: data.result[1][2],
+  //       available: data.result[1][9],
+  //       ladies: data.result[1][10],
+  //       gents: data.result[1][11]
+  //     }
 
-    const dtimes = []
-    const atimes = []
-    const bc = []
-    const amnt = []
-
-    if (req.body.hasOwnProperty('dTimes')) {
-      req.body.dTimes.forEach(interval => {
-        dtimes.push({ dt: timeConf[interval] })
-      })
-
-      query.$and.push({ $or: dtimes })
-    }
-
-    if (req.body.hasOwnProperty('aTimes')) {
-      req.body.aTimes.forEach(interval => {
-        atimes.push({ at: timeConf[interval] })
-      })
-      query.$and.push({ $or: atimes })
-    }
-
-    if (req.body.hasOwnProperty('bc')) {
-      req.body.bc.forEach(cat => {
-        const dd = {}
-        const key = 'bc.' + cat
-        dd[key] = true
-        bc.push(dd)
-      })
-      query.$and.push({ $and: bc })
-    }
-
-    if (req.body.hasOwnProperty('amenities')) {
-      query.$and.push({ amnt: { $all: req.body.amenities } })
-    }
-
-    if (query.$and.length < 1) {
-      delete query.$and
-    }
-
-    // console.log(JSON.stringify(query))
-    return bus.find(query)
-  }
-}
-
-async function getSeatDetails (req, res, next) {
-  // TODO let bitla
-  const bookings = await _getBookingsByBus(req.query.bId, req.query.date)
-  Promise.all([bookings]).then(function (values) {
-    const data = {
-      booking: values[0],
-      deck: req.deck
-    }
-    // if (values[0].length < 1) {
-    //   throw new CError({
-    //     status: 404,
-    //     message: 'No bus found for this route',
-    //     name: 'Search',
-    //     code: 101
-    //   })
-    // }
-
-    return res.json(_resp(data))
-  }).catch(err => {
-    return next(error(err))
-  })
-}
-
-function getOffers (req, res, next) {
-  // return offers.
+  //     return res.json(_resp(avaialble))
+  //   })
 }
 
 module.exports = {
   search,
-  getOffers,
-  getSeatDetails
-}
-
-function _getBookings (where, date) {
-  where.day = getUnixTime(date)
-  where.status = { [Op.in]: ['INIT', 'PENDING', 'DONE'] }
-
-  return sql.Seat.count({
-    where: where,
-    group: ['bId']
-  })
-}
-
-function _getBookingsByBus (bId, date) {
-  const where = {
-    bId: bId
-  }
-  where.day = getUnixTime(date)
-  where.status = { [Op.in]: ['INIT', 'PENDING', 'DONE'] }
-  return sql.Seat.findAll({
-    attributes: [['seat', 's']],
-    where: where
-  }).catch(err => {
-    throw err
-  })
-}
-
-function getUnixTime (dateStr) {
-  return new Date(dateStr).getTime() / 1000 | 0
+  available
 }

@@ -1,192 +1,74 @@
 const CError = require('../errors/cError')
 const error = require('http-errors')
-const sql = require('../db/sql')
-const Op = sql.Sequelize.Op
 const _resp = require('../lib/resp')
 const rzp = require('../config/razorpay')
+const api = require('../lib/bitla')
+const bookModel = require('../db/mongo/bookings')
+const cancelModel = require('../db/mongo/cancel')
 
-function cancel (req, res, next) {
-  const seatList = req.body.seats.split(',')
-
-  return sql.sequelize.transaction(function (t) {
-    return sql.Booking.findOne({
-      where: {
-        id: req.body.bookId,
-        userId: req.user.userId,
-        status: 'DONE'
-      },
-      transaction: t
-    }).then(booking => {
-      if (!booking) {
-        throw new CError({
-          status: 404,
-          message: 'No bookings available.',
-          name: 'NotFound'
-        })
-      }
-
-      if (Date.now() > (booking.maxCanTime * 1000)) {
-        throw new CError({
-          status: 410,
-          message: 'Cancellation is not allowed after cancellation window.',
-          name: 'Booking',
-          code: 101
-        })
-      }
-
-      return sql.Seat.findOne({
-        attributes: [[sql.sequelize.fn('sum', sql.sequelize.col('fare')), 'total'],
-          [sql.sequelize.fn('count', sql.sequelize.col('id')), 'count']],
-        where: {
-          bookId: req.body.bookId,
-          seat: {
-            [Op.in]: seatList
-          },
-          status: 'DONE'
-        },
-        group: ['bookId'],
-        raw: true
-      }, { transaction: t })
-        .then(function (seatData) {
-          if (!seatData) {
-            throw new CError({
-              status: 404,
-              message: 'No seats available.',
-              name: 'NotFound'
-            })
-          }
-          return sql.Seat.update({ status: 'CANCEL' },
-            {
-              where: {
-                bookId: req.body.bookId,
-                seat: {
-                  [Op.in]: seatList
-                }
-              },
-              transaction: t
-            }).then(function (data) {
-            const amntInPaise = seatData.total * 100
-            return rzp.payments.refund(booking.paymentId, {
-              amount: amntInPaise,
-              notes: {
-                userId: booking.userId,
-                bookId: booking.id,
-                seats: req.body.seats
-              }
-            }).then(refundData => {
-              return sql.Refund.create({
-                refundId: refundData.id,
-                bookId: req.body.bookId,
-                userId: req.user.userId
-              }).then(refund => {
-                // TODO notify BITLA
-                booking.status = 'CANCEL'
-                booking.save()
-                return refund
-              })
-            })
-          })
-        })
-    })
-  }).then(refund => {
-    return res.json(_resp(refund.id))
+function canCancel (req, res, next) {
+  const str = `?ticket_number=${req.query.ticket_number}&seat_numbers=${req.query.seat_numbers}`
+  return api('canCancel', str).then(data => {
+    return res.json(_resp(data))
   }).catch(err => {
     return next(error(err))
   })
 }
 
-// function cancel (req, res, next) {
-//   const seatList = req.body.seats.split(',')
-//   return sql.sequelize.transaction(function (t) {
-//     return sql.Booking.findOne({
-//       where: {
-//         id: req.body.bookId,
-//         userId: req.user.userId,
-//         status: 'DONE'
-//       },
-//       transaction: t
-//     }).then(booking => {
-//       if (!booking) {
-//         throw new CError({
-//           status: 404,
-//           message: 'No bookings available.',
-//           name: 'NotFound'
-//         })
-//       }
+function cancel (req, res, next) {
+  const seats = req.body.seats.split(',')
+  return api('cancel', req.data.str)
+    .then(data => {
+      console.log(JSON.stringify(data))
+      if (data.hasOwnProperty('response')) {
+        throw new CError({
+          code: data.response.code,
+          status: 404,
+          message: 'Error while cancellations',
+          name: 'CancelError'
+        })
+      }
 
-//       if (Date.now() > (booking.maxCanTime * 1000)) {
-//         throw new CError({
-//           status: 410,
-//           message: 'Cancellation is not allowed after cancellation window.',
-//           name: 'Booking',
-//           code: 101
-//         })
-//       }
+      return bookModel.findOne({
+        userId: req.user.userId,
+        ticket_number: req.body.ticket_number,
+        seats: { $all: seats }
+      }).then(booking => {
+        if (!booking) {
+          return next(error(new CError({
+            status: 404,
+            message: 'No booking found.',
+            name: 'NotFound'
+          })))
+        }
 
-//       return sql.Seat.findOne({
-//         attributes: [[sql.sequelize.fn('sum', sql.sequelize.col('fare')), 'total'],
-//           [sql.sequelize.fn('count', sql.sequelize.col('id')), 'count']],
-//         where: {
-//           bookId: req.body.bookId,
-//           seat: {
-//             [Op.in]: seatList
-//           },
-//           status: 'DONE'
-//         },
-//         group: ['bookId'],
-//         raw: true
-//       }, { transaction: t })
-//         .then(function (seatData) {
-//           if (!seatData) {
-//             throw new CError({
-//               status: 404,
-//               message: 'No seats available.',
-//               name: 'NotFound'
-//             })
-//           }
-//           return sql.Seat.update({ status: 'CANCEL' },
-//             {
-//               where: {
-//                 bookId: req.body.bookId,
-//                 seat: {
-//                   [Op.in]: seatList
-//                 }
-//               },
-//               transaction: t
-//             }).then(function (data) {
-//             return [booking, seatData.total]
-//           })
-//         })
-//     }).then(function (data) {
-//       const amntInPaise = data[1] * 100
-//       return rzp.payments.refund(data[0].paymentId, {
-//         amount: amntInPaise,
-//         notes: {
-//           userId: data[0].userId,
-//           bookId: data[0].id,
-//           seats: req.body.seats
-//         }
-//       }).then(refundData => {
-//         return sql.Refund.create({
-//           refundId: refundData.id,
-//           bookId: req.body.bookId,
-//           userId: req.user.userId
-//         }).then(refund => {
-//           // TODO notify BITLA
-//           data[0].status = 'CANCEL'
-//           data[0].save()
-//           return res.json(_resp(refund.id))
-//         })
-//       })
-//     }).catch(function (err) {
-//       console.log(err)
-//       t.rollback()
-//       return next(error(err))
-//     })
-//   }).catch(function (err) {
-//     return next(error(err))
-//   })
-// }
+        booking.seat_fare_details.forEach(seatData => {
+          if (seats.indexOf(seatData.seat_detail.seat_number) !== -1) {
+            seatData.seat_detail.status = 'CANCEL'
+          }
+        })
+
+        booking.save()
+
+        return cancelModel.create(data.result.cancel_ticket)
+          .then(cancelRecords => {
+            const amntInPaise = parseFloat(data.result.cancel_ticket.refund_amount) * 100
+            return rzp.payments.refund(booking.paymentId, {
+              amount: amntInPaise,
+              notes: {
+                userId: booking.userId,
+                bookId: booking.ticket_number,
+                seats: req.query.seatNums
+              }
+            })
+          })
+      }).then(data => {
+        return res.json(_resp(req.data.ticket_number))
+      }).catch(err => {
+        return next(error(err))
+      })
+    })
+}
 
 module.exports = {
   cancel

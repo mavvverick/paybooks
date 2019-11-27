@@ -18,6 +18,7 @@ const busSchema = new Schema({
   rId: Number,
   frm: String,
   whr: String,
+  date: Date,
   typ: String,
   rt: {
     toRt: String,
