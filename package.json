@@ -24,6 +24,7 @@
   "homepage": "https://gitlab.com/pathfinder-19N33W/yolo#README",
   "dependencies": {
     "dotenv": "^8.1.0",
+    "elasticsearch": "^16.5.0",
     "express": "^4.17.1",
     "express-validation": "^1.0.2",
     "helmet": "^3.21.0",

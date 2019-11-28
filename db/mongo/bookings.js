@@ -60,6 +60,7 @@ const bookingSchema = new Schema({
   ticket_status: {
     type: 'String'
   },
+  imgs: [String],
   ticket_number: {
     type: 'String'
   },
