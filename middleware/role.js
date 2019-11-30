@@ -3,7 +3,7 @@ const CError = require('../errors/cError')
 
 const isAgent = (req, res, next) => {
   if (!req.user.isAgent) {
-    return next(error(CError({
+    return next(error(new CError({
       status: 404,
       message: 'Reserved for agents.',
       name: 'NotFound'
@@ -14,7 +14,7 @@ const isAgent = (req, res, next) => {
 
 const isUser = (req, res, next) => {
   if (req.user.isAgent) {
-    return next(error(CError({
+    return next(error(new CError({
       status: 404,
       message: 'Reserved for agents.',
       name: 'NotFound'
