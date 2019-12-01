@@ -22,7 +22,11 @@ function cities (req, res, next) {
       }
     }
   }).then(cities => {
-    res.json(_resp(cities))
+    let data = []
+    if (cities.hasOwnProperty('hits')) {
+      data = cities.hits.hits
+    }
+    res.json(_resp(data))
   }).catch(err => {
     next(error(err))
   })
