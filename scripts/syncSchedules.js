@@ -20,7 +20,6 @@ function init (dateStr) {
               id: opSchedule[0]
             }, { status: 'Cancel' })
           }
-
           schedule.result.hash = '' + schedule.result.origin_id + schedule.result.destination_id
           schedule.result.amenities = JSON.parse(schedule.result.amenities)
           const idx = { index: { _index: 'schedules', _id: schedule.result.id } }
@@ -66,6 +65,28 @@ function serialize (data) {
     via: data.via,
     main_dep_time: data.main_dep_time,
     is_ac_bus: data.is_ac_bus,
-    total_seats: data.bus_layout.total_seats
+    total_seats: data.bus_layout.total_seats,
+    available: data.bus_layout.available.split(',').length
   }
 }
+
+var getDates = function (startDate, endDate) {
+  var dates = []
+  var currentDate = startDate
+  var addDays = function (days) {
+    var date = new Date(this.valueOf())
+    date.setDate(date.getDate() + days)
+    return date
+  }
+  while (currentDate <= endDate) {
+    dates.push(currentDate)
+    currentDate = addDays.call(currentDate, 1)
+  }
+  return dates
+}
+
+// Usage
+var dates = getDates(new Date(2013, 10, 22), new Date(2013, 11, 25))
+dates.forEach(function (date) {
+  console.log(date)
+})

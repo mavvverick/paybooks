@@ -9,7 +9,8 @@ function getSchedule (req, res, next) {
     bus_layout: 1,
     travel_date: 1,
     origin_id: 1,
-    destination_id: 1
+    destination_id: 1,
+    service_tax_percent: 1
   }
   req.data = {}
   req.data.seats = req.body.seats.split(',')
@@ -48,6 +49,7 @@ function getSchedule (req, res, next) {
         })
       }
 
+      req.data.tax = getTax(req.data.totalAmount, req.data.schedule.service_tax_percent)
       return next()
     })
   }).catch(err => {
@@ -59,4 +61,8 @@ module.exports = getSchedule
 
 function getFare (req) {
   return api('availability', req.body.sId)
+}
+
+function getTax (amount, taxPercent) {
+  return (taxPercent * amount) / 100
 }

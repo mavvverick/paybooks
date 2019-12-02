@@ -84,15 +84,11 @@ module.exports = {
   },
 
   // 5. Update a document
-  updateDocument: function (req, res, index, _id, docType, payload) {
-    elasticClient.update({
+  updateDocument: function (index, _id, payload) {
+    return elasticClient.update({
       index: index,
-      type: docType,
       id: _id,
       body: payload
-    }, function (err, resp) {
-      if (err) return res.json(err)
-      return res.json(resp)
     })
   },
 

@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const seatSchema = new Schema({
-  userId: String,
   seat_number: {
     type: 'String'
   },
@@ -52,6 +51,7 @@ const seatDetailSchema = new Schema({
 })
 
 const bookingSchema = new Schema({
+  userId: String,
   orderId: String,
   paymentId: String,
   meta: String,

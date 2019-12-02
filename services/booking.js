@@ -32,13 +32,16 @@ async function initBooking (req, res, next) {
           })
         }
         bookData = bookingData
+
         return rzp.orders.create({
-          amount: req.data.totalAmount * 100,
+          amount: (req.data.totalAmount + req.data.tax) * 100,
           currency: 'INR',
           receipt: bookingData.result.ticket_details.pnr_number,
           payment_capture: 1,
           notes: {
-            user: req.user.userId
+            user: req.user.userId,
+            amount: req.data.totalAmount,
+            tax: req.data.tax
           }
         })
       }).then(rzpRecord => {
@@ -63,7 +66,6 @@ function commitBooking (req, res, next) {
   const ticketNumber = req.body.data.bookId
   return api('validate', ticketNumber)
     .then(data => {
-      console.log(JSON.stringify(data))
       if (data.hasOwnProperty('response')) {
         throw new CError({
           status: data.response.code,

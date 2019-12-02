@@ -49,7 +49,7 @@ function cancel (req, res, next) {
         })
 
         booking.save()
-
+        data.result.cancel_ticket.ticket_number = req.body.ticket_number
         return cancelModel.create(data.result.cancel_ticket)
           .then(cancelRecords => {
             const amntInPaise = parseFloat(data.result.cancel_ticket.refund_amount) * 100
@@ -58,12 +58,12 @@ function cancel (req, res, next) {
               notes: {
                 userId: booking.userId,
                 bookId: booking.ticket_number,
-                seats: req.query.seatNums
+                seats: req.body.seats
               }
             })
           })
       }).then(data => {
-        return res.json(_resp(req.data.ticket_number))
+        return res.json(_resp(req.body.ticket_number))
       }).catch(err => {
         return next(error(err))
       })
