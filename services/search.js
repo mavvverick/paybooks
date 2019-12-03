@@ -128,6 +128,7 @@ function queryBuilder (req) {
 
   query.bool.must.push(_gen('hash', req.hash))
   query.bool.must.push(_gen('travel_date', req.date.getTime()))
+  query.bool.must.push(_range('travel_date', { gte: Date.now() }))
 
   if (req.body.hasOwnProperty('amenities')) {
     req.body.amenities.forEach(amenity => {
@@ -136,11 +137,11 @@ function queryBuilder (req) {
   }
 
   if (req.body.hasOwnProperty('dep_time')) {
-    query.bool.must.push(_range('dep_time', req.body.dep_time))
+    query.bool.must.push(_range('dep_time', timeConf[req.body.dep_time]))
   }
 
   if (req.body.hasOwnProperty('arr_time')) {
-    query.bool.must.push(_range('arr_time', req.body.arr_time))
+    query.bool.must.push(_range('arr_time', timeConf[req.body.arr_time]))
   }
 
   if (req.body.hasOwnProperty('is_ac')) {
@@ -156,7 +157,7 @@ function queryBuilder (req) {
 
   function _range (key, value) {
     const data = { range: { } }
-    data.range[key] = timeConf[value]
+    data.range[key] = value
     return data
   }
   return query

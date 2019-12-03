@@ -6,9 +6,36 @@ const elastic = require('../config/elasticsearch')
 
 init()
 
+function getDates (startDate, noOfDays) {
+  var dates = []
+  var currentDate = startDate
+  var addDays = function (days) {
+    var date = new Date(this.valueOf())
+    date.setDate(date.getDate() + days)
+    return date
+  }
+
+  var endDate = new Date()
+  endDate.setDate(endDate.getDate() + noOfDays)
+  while (currentDate <= endDate) {
+    dates.push(currentDate)
+    currentDate = addDays.call(currentDate, 1)
+  }
+  return dates
+}
+
 function init (dateStr) {
   const elasticList = []
-  return api('opSchedule', '/3027/2019-12-10').then(opScs => {
+  var dates = getDates(new Date(), 90)
+  dates.forEach(function (d) {
+    const date = d.getDate()
+    const month = d.getMonth() + 1 // Since getMonth() returns month from 0-11 not 1-12
+    const year = d.getFullYear()
+    const dt = `${year}-${month}-${date}`
+    console.log(dt)
+  })
+
+  return api('opSchedule', '/3027/2019-12-03').then(opScs => {
     delete opScs.result[0]
     const promiseArr = opScs.result.map(function (opSchedule) {
       // return the promise to array
@@ -71,23 +98,8 @@ function serialize (data) {
   }
 }
 
-var getDates = function (startDate, endDate) {
-  var dates = []
-  var currentDate = startDate
-  var addDays = function (days) {
-    var date = new Date(this.valueOf())
-    date.setDate(date.getDate() + days)
-    return date
-  }
-  while (currentDate <= endDate) {
-    dates.push(currentDate)
-    currentDate = addDays.call(currentDate, 1)
-  }
-  return dates
-}
-
-// Usage
-var dates = getDates(new Date(2013, 10, 22), new Date(2013, 11, 25))
-dates.forEach(function (date) {
-  console.log(date)
-})
+// // Usage
+// var dates = getDates(new Date(2013, 10, 22), new Date(2013, 11, 25))
+// dates.forEach(function (date) {
+//   console.log(date)
+// })
