@@ -72,6 +72,7 @@ function available (req, res, next) {
     id: req.query.sid
   }).select({
     _id: 0,
+    service_tax_percent: 1,
     'bus_layout.total_seats': 1,
     'bus_layout.coach_details': 1,
     'bus_layout.boarding_stages': 1,
@@ -86,6 +87,14 @@ function available (req, res, next) {
     }
     return api('availability', req.query.sid)
       .then(data => {
+        elastic.updateDocument(
+          'schedules',
+          req.query.sid,
+          { doc: { available: data.result[1][2] } }
+        ).catch(err => {
+          console.log(err)
+        })
+
         schedule.available = {
           num: data.result[1][2],
           seats: data.result[1][9],

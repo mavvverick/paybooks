@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     category: {
       type: DataTypes.ENUM,
-      values: ['DEPOSIT', 'WITHDRAWL', 'REFER', 'CASHBACK']
+      values: ['DEPOSIT', 'CANCEL', 'BOOK', 'WITHDRAWL', 'REFER', 'CASHBACK']
     },
     status: {
       type: DataTypes.ENUM,

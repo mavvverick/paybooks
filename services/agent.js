@@ -3,6 +3,10 @@ const rzp = require('../config/razorpay')
 const error = require('http-errors')
 const CError = require('../errors/cError')
 const _resp = require('../lib/resp')
+const api = require('../lib/bitla')
+const tools = require('../utils/tools')
+const bookModel = require('../db/mongo/bookings')
+const cancelModel = require('../db/mongo/cancel')
 
 function initWallet (req, res, next) {
   let tranInst
@@ -26,7 +30,6 @@ function initWallet (req, res, next) {
       })
     })
   }).then(rzpRecord => {
-    console.log(rzpRecord)
     tranInst.orderId = rzpRecord.id
     tranInst.save()
     res.json(_resp(rzpRecord))
@@ -70,7 +73,6 @@ function commit (req, res, next) {
         transaction: t
       })
     }).then(data => {
-      console.log(data)
       if (data[0] === 1) {
         tranInst.status = 'DONE'
         tranInst.paymentId = req.body.data.paymentId
@@ -90,7 +92,8 @@ function commit (req, res, next) {
 }
 
 function initBooking (req, res, next) {
-  let seats, bookingData
+  let pnr
+  const finalAmount = req.data.totalAmount + req.data.tax
   return sql.sequelize.transaction(t => {
     // busCreateData = _serializeBusData(req)
     return sql.User.findOne({
@@ -101,47 +104,86 @@ function initBooking (req, res, next) {
       lock: t.LOCK.UPDATE
     }).then(userData => {
       // TODO add comission
-      if (userData.amount <= req.deck.finalAmount) {
+      if (userData.amount <= finalAmount) {
         throw Error('Low wallet balance')
       }
-
       userData.decrement({
-        amount: req.deck.finalAmount
+        amount: finalAmount
       }, {
         transaction: t
       })
-      req.busSerializedData.status = 'DONE'
-      return sql.Booking.create(req.busSerializedData,
-        { transaction: t }).then(booking => {
-        bookingData = booking
-        return sql.Transaction.create({
-          userId: req.user.userId,
-          orderId: booking.id,
-          status: 'DONE',
-          type: 'DR'
-        }, { transaction: t }).then(transaction => {
-          seats = _serializeSeatData(req, booking)
-          return sql.Seat.bulkCreate(seats,
-            { transaction: t })
-        })
+      const booking = tools.serializeBooking(req)
+      const bookData = {
+        ticket_status: 'INIT',
+        total_fare: finalAmount,
+        seatMeta: req.body.seats,
+        seats: req.data.rawSeats,
+        userId: req.user.userId
+      }
+      return bookModel.create(bookData).then(bookRecord => {
+        return api('book', [req.body.sId, booking])
+          .then(bookingData => {
+            if (bookingData.hasOwnProperty('response')) {
+              throw new CError({
+                status: bookingData.response.code,
+                message: 'Error while booking',
+                name: 'BookinError'
+              })
+            }
+            pnr = bookingData.result.ticket_details.pnr_number
+            bookRecord.ticket_number = pnr
+            bookRecord.save()
+            return sql.Transaction.create({
+              userId: req.user.userId,
+              amount: finalAmount,
+              fee: req.data.tax,
+              category: 'BOOK',
+              orderId: pnr,
+              status: 'DONE',
+              type: 'DR'
+            }, { transaction: t })
+          })
       })
     })
-  }).then(result => {
-    return res.json(_resp(result))
+  }).then(transaction => {
+    return api('validate', pnr)
+      .then(data => {
+        if (data.hasOwnProperty('response')) {
+          throw new CError({
+            status: data.response.code,
+            message: 'Error while confirming booking',
+            name: 'BookinError'
+          })
+        }
+        const details = data.result.ticket_details
+        details.orderId = transaction.id
+        details.paymentId = 'w911'
+
+        return bookModel.findOneAndUpdate({
+          userId: req.user.userId,
+          ticket_number: pnr,
+          ticket_status: 'INIT'
+        }, details).then(bookRecord => {
+          if (!bookRecord) {
+            throw new CError({
+              status: 404,
+              message: 'No valid booking data ' +
+                'contact support for further assistance',
+              name: 'NotFound'
+            })
+          }
+          return res.json(_resp(pnr))
+        })
+      })
   }).catch(err => {
     // Transaction has been rolled back
-    if (err.name === 'SequelizeUniqueConstraintError') {
-      if (err.errors[0].type === 'unique violation') {
-        return next(error(Error('Seat not available')))
-      }
-    }
     next(error(err))
   })
 }
 
 function getWalletBalance (req, res, next) {
   return sql.User.findOne({
-    attributes: ['amount'],
+    attributes: ['amount', 'tokens'],
     where: {
       userId: req.user.userId
     }
@@ -157,10 +199,81 @@ function getWalletBalance (req, res, next) {
   })
 }
 
+function cancel (req, res, next) {
+  const seats = req.body.seats.split(',')
+  return api('cancel', req.data.str)
+    .then(data => {
+      if (data.hasOwnProperty('response')) {
+        throw new CError({
+          code: data.response.code,
+          status: 404,
+          message: 'Error while cancellations',
+          name: 'CancelError'
+        })
+      }
+
+      return bookModel.findOne({
+        userId: req.user.userId,
+        ticket_number: req.body.ticket_number,
+        seats: { $all: seats }
+      }).then(booking => {
+        if (!booking) {
+          return next(error(new CError({
+            status: 404,
+            message: 'No booking found.',
+            name: 'NotFound'
+          })))
+        }
+
+        booking.seat_fare_details.forEach(seatData => {
+          if (seats.indexOf(seatData.seat_detail.seat_number) !== -1) {
+            seatData.seat_detail.status = 'CANCEL'
+          }
+        })
+
+        booking.save()
+        data.result.cancel_ticket.ticket_number = req.body.ticket_number
+        return cancelModel.create(data.result.cancel_ticket)
+          .then(cancelRecords => {
+            return sql.sequelize.transaction(t => {
+              return sql.Transaction.create({
+                userId: req.user.userId,
+                orderId: req.body.ticket_number,
+                category: 'CANCEL',
+                status: 'DONE',
+                type: 'CR'
+              }, { transaction: t }).then(transaction => {
+                return sql.User.update(
+                  { amount: sql.Sequelize.literal(`amount + ${parseFloat(data.result.cancel_ticket.refund_amount)}`) },
+                  {
+                    where: {
+                      userId: req.user.userId
+                    },
+                    transaction: t
+                  }).then(rowUpdated => {
+                  if (rowUpdated[0] === 0) {
+                    throw Error(
+                      'Error occured while adding money to wallet, contact support.'
+                    )
+                  }
+                  return transaction
+                })
+              })
+            })
+          })
+      }).then(data => {
+        return res.json(_resp(req.body.ticket_number))
+      }).catch(err => {
+        return next(error(err))
+      })
+    })
+}
+
 module.exports = {
   initWallet,
   commit,
   initBooking,
+  cancel,
   getWalletBalance
 }
 

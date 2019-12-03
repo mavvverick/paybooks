@@ -63,6 +63,7 @@ function serialize (data) {
     bus_type: data.bus_type,
     can_cancel: data.can_cancel,
     via: data.via,
+    cost: data.cost,
     main_dep_time: data.main_dep_time,
     is_ac_bus: data.is_ac_bus,
     total_seats: data.bus_layout.total_seats,

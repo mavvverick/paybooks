@@ -23,7 +23,6 @@ async function initBooking (req, res, next) {
   }).then(bookRecord => {
     return api('book', [req.body.sId, booking])
       .then(bookingData => {
-        console.log(JSON.stringify(bookingData))
         if (bookingData.hasOwnProperty('response')) {
           throw new CError({
             status: bookingData.response.code,
@@ -57,11 +56,11 @@ async function initBooking (req, res, next) {
 }
 
 function commitBooking (req, res, next) {
-  // const validate = rzp.ValidateOrder(req.body.data)
+  const validate = rzp.ValidateOrder(req.body.data)
 
-  // if (!validate) {
-  //   throw Error('Payment data can not be validated, contact support')
-  // }
+  if (!validate) {
+    throw Error('Payment data can not be validated, contact support')
+  }
 
   const ticketNumber = req.body.data.bookId
   return api('validate', ticketNumber)

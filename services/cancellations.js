@@ -19,7 +19,6 @@ function cancel (req, res, next) {
   const seats = req.body.seats.split(',')
   return api('cancel', req.data.str)
     .then(data => {
-      console.log(JSON.stringify(data))
       if (data.hasOwnProperty('response')) {
         throw new CError({
           code: data.response.code,
@@ -64,9 +63,9 @@ function cancel (req, res, next) {
           })
       }).then(data => {
         return res.json(_resp(req.body.ticket_number))
-      }).catch(err => {
-        return next(error(err))
       })
+    }).catch(err => {
+      return next(error(err))
     })
 }
 

@@ -5,7 +5,6 @@ const lruCache = require('../config/lruCache')
 
 function cities (req, res, next) {
   if (lruCache.peek('cities')) {
-    console.log('hereeeee')
     return res.json(resp(lruCache.get('cities')))
   }
 

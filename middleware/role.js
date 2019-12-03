@@ -16,7 +16,7 @@ const isUser = (req, res, next) => {
   if (req.user.isAgent) {
     return next(error(new CError({
       status: 404,
-      message: 'Reserved for agents.',
+      message: 'Reserved for users.',
       name: 'NotFound'
     })))
   }

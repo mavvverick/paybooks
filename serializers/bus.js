@@ -1,5 +1,11 @@
 const Joi = require('joi')
 
+const city = {
+  query: {
+    q: Joi.string().required()
+  }
+}
+
 const search = {
   body: {
     frm: Joi.number().required(),
@@ -38,7 +44,6 @@ const initBook = {
 const commitBook = {
   body: {
     userId: Joi.string().required(),
-    currency: Joi.string().valid('INR').required(),
     orderId: Joi.string().required(),
     paymentId: Joi.string().required(),
     signature: Joi.string().required()
@@ -63,5 +68,6 @@ module.exports = {
   initBook,
   commitBook,
   seats,
-  cancel
+  cancel,
+  city
 }
