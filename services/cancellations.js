@@ -49,6 +49,8 @@ function cancel (req, res, next) {
 
         booking.save()
         data.result.cancel_ticket.ticket_number = req.body.ticket_number
+        data.result.cancel_ticket.reason = req.body.reason
+
         return cancelModel.create(data.result.cancel_ticket)
           .then(cancelRecords => {
             const amntInPaise = parseFloat(data.result.cancel_ticket.refund_amount) * 100

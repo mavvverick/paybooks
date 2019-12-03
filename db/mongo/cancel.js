@@ -14,6 +14,7 @@ const seatSchema = new Schema({
 
 const cancelSchema = new Schema({
   ticket_number: String,
+  reason: String,
   refund_amount: Number,
   cancellation_charges: Number,
   seat_numbers: String,
