@@ -26,51 +26,49 @@ function getDates (startDate, noOfDays) {
 
 function init (dateStr) {
   const elasticList = []
-  var dates = getDates(new Date(), 90)
+  var dates = getDates(new Date(), 2)
   dates.forEach(function (d) {
-    const date = d.getDate()
+    const date = ('0' + d.getDate()).slice(-2)
     const month = d.getMonth() + 1 // Since getMonth() returns month from 0-11 not 1-12
     const year = d.getFullYear()
     const dt = `${year}-${month}-${date}`
-    console.log(dt)
-  })
-
-  return api('opSchedule', '/3027/2019-12-03').then(opScs => {
-    delete opScs.result[0]
-    const promiseArr = opScs.result.map(function (opSchedule) {
-      // return the promise to array
-      return api('schedule', opSchedule[0])
-        .then(schedule => {
-          if (schedule.hasOwnProperty('response')) {
-            console.log(opSchedule[0], schedule)
+    return api('opSchedule', `/3027/${dt}`).then(opScs => {
+      delete opScs.result[0]
+      const promiseArr = opScs.result.map(function (opSchedule) {
+        // return the promise to array
+        return api('schedule', opSchedule[0])
+          .then(schedule => {
+            if (schedule.hasOwnProperty('response')) {
+              console.log(opSchedule[0], schedule)
+              return scheduleModel.findOneAndUpdate({
+                id: opSchedule[0]
+              }, { status: 'Cancel' })
+            }
+            schedule.result.hash = '' + schedule.result.origin_id + schedule.result.destination_id
+            schedule.result.amenities = JSON.parse(schedule.result.amenities)
+            const idx = { index: { _index: 'schedules', _id: schedule.result.id } }
+            const data = serialize(schedule.result)
+            elasticList.push(idx, data)
             return scheduleModel.findOneAndUpdate({
-              id: opSchedule[0]
-            }, { status: 'Cancel' })
-          }
-          schedule.result.hash = '' + schedule.result.origin_id + schedule.result.destination_id
-          schedule.result.amenities = JSON.parse(schedule.result.amenities)
-          const idx = { index: { _index: 'schedules', _id: schedule.result.id } }
-          const data = serialize(schedule.result)
-          elasticList.push(idx, data)
-          return scheduleModel.findOneAndUpdate({
-            id: schedule.result.id
-          }, schedule.result, { upsert: true })
-            .then(data => {
-              console.log('DONE --- ', opSchedule[0])
-            }).catch(err => {
-              console.log('ERROR --- ', opSchedule[0], err)
-            })
-        })
-    })
-
-    return Promise.all(promiseArr)
-  }).then(data => {
-    return elastic.bulk(elasticList)
-      .then(data => {
-        console.log(data)
+              id: schedule.result.id
+            }, schedule.result, { upsert: true })
+              .then(data => {
+                console.log('DONE --- ', opSchedule[0])
+              }).catch(err => {
+                console.log('ERROR --- ', opSchedule[0], err)
+              })
+          })
       })
-  }).catch(err => {
-    console.log(err)
+
+      return Promise.all(promiseArr)
+    }).then(data => {
+      return elastic.bulk(elasticList)
+        .then(data => {
+          console.log(data)
+        })
+    }).catch(err => {
+      console.log(err)
+    })
   })
 }
 

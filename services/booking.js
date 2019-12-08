@@ -14,45 +14,53 @@ async function initBooking (req, res, next) {
   }
 
   let bookData
-  return bookModel.create({
+
+  const initBookingData = {
     ticket_status: 'INIT',
     total_fare: req.data.totalAmount,
     seatMeta: req.body.seats,
     seats: req.data.rawSeats,
     userId: req.user.userId
-  }).then(bookRecord => {
-    return api('book', [req.body.sId, booking])
-      .then(bookingData => {
-        if (bookingData.hasOwnProperty('response')) {
-          throw new CError({
-            status: bookingData.response.code,
-            message: 'Error while booking',
-            name: 'BookinError'
-          })
-        }
-        bookData = bookingData
+  }
 
-        return rzp.orders.create({
-          amount: (req.data.totalAmount + req.data.tax) * 100,
-          currency: 'INR',
-          receipt: bookingData.result.ticket_details.pnr_number,
-          payment_capture: 1,
-          notes: {
-            user: req.user.userId,
-            amount: req.data.totalAmount,
-            tax: req.data.tax
+  if (req.body.hasOwnProperty('gst')) {
+    initBookingData.gst = req.body.gst
+  }
+
+  return bookModel.create(initBookingData)
+    .then(bookRecord => {
+      return api('book', [req.body.sId, booking])
+        .then(bookingData => {
+          if (bookingData.hasOwnProperty('response')) {
+            throw new CError({
+              status: bookingData.response.code,
+              message: 'Error while booking',
+              name: 'BookinError'
+            })
           }
+          bookData = bookingData
+
+          return rzp.orders.create({
+            amount: (req.data.totalAmount + req.data.tax) * 100,
+            currency: 'INR',
+            receipt: bookingData.result.ticket_details.pnr_number,
+            payment_capture: 1,
+            notes: {
+              user: req.user.userId,
+              amount: req.data.totalAmount,
+              tax: req.data.tax
+            }
+          })
+        }).then(rzpRecord => {
+          bookRecord.orderId = rzpRecord.id
+          bookRecord.ticket_number = bookData.result.ticket_details.pnr_number
+          bookRecord.operator_pnr = bookData.result.ticket_details.operator_pnr
+          bookRecord.save()
+          return res.json(_resp(rzpRecord))
         })
-      }).then(rzpRecord => {
-        bookRecord.orderId = rzpRecord.id
-        bookRecord.ticket_number = bookData.result.ticket_details.pnr_number
-        bookRecord.operator_pnr = bookData.result.ticket_details.operator_pnr
-        bookRecord.save()
-        return res.json(_resp(rzpRecord))
-      })
-  }).catch(err => {
-    next(error(err))
-  })
+    }).catch(err => {
+      next(error(err))
+    })
 }
 
 function commitBooking (req, res, next) {

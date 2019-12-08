@@ -54,6 +54,7 @@ const bookingSchema = new Schema({
   userId: String,
   orderId: String,
   paymentId: String,
+
   meta: String,
   seatMeta: Array,
   seats: Array,
@@ -169,7 +170,8 @@ const bookingSchema = new Schema({
   },
   operator_seat_wise_pnr: {
     type: 'String'
-  }
+  },
+  gst: Object
 }, {
   timestamps: true
 })
