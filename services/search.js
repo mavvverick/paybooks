@@ -2,9 +2,10 @@ const CError = require('../errors/cError')
 const error = require('http-errors')
 const _resp = require('../lib/resp')
 const scheduleModel = require('../db/mongo/schedule')
+const routeModel = require('../db/mongo/liveRoute')
 const api = require('../lib/bitla')
-// const scheduleParams = require('../utils/scheduleSchema')
 const elastic = require('../config/elasticsearch')
+const lruCache = require('../config/lruCache')
 
 function cities (req, res, next) {
   return elastic.search({
@@ -51,18 +52,6 @@ function search (req, res, next) {
   }).catch(err => {
     next(error(err))
   })
-
-  // const dt = new Date(req.body.date)
-  // return scheduleModel.find({
-  //   travel_date: dt,
-  //   hash: '' + req.body.frm + req.body.whr
-  // }).select(scheduleParams)
-  //   .lean()
-  //   .then(data => {
-  //     res.json(_resp(data))
-  //   }).catch(err => {
-  //     next(error(err))
-  //   })
 }
 
 function available (req, res, next) {
@@ -108,10 +97,25 @@ function available (req, res, next) {
   })
 }
 
+function poupular (req, res, next) {
+  if (lruCache.peek('popular')) {
+    return res.json(_resp(lruCache.get('popular')))
+  }
+
+  return routeModel.find({
+    isActive: true,
+    isPopular: true
+  }).then(routeData => {
+    lruCache.set('popular', routeData)
+    return res.json(_resp(routeData))
+  })
+}
+
 module.exports = {
   search,
   available,
-  cities
+  cities,
+  poupular
 }
 
 function queryBuilder (req) {

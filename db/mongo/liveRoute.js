@@ -8,7 +8,8 @@ const liveRouteSchema = new Schema({
   origin: String,
   origin_id: Number,
   sort: Number,
-  isPopular: true
+  isActive: Boolean,
+  isPopular: Boolean
 })
 
 const LiveRoute = mongoose.model('LiveRoute', liveRouteSchema)
