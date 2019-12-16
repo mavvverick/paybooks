@@ -26,7 +26,8 @@ function getDates (startDate, noOfDays) {
 
 function init (dateStr) {
   const elasticList = []
-  var dates = getDates(new Date(), 2)
+  var dates = getDates(new Date(), 90)
+
   dates.forEach(function (d) {
     const date = ('0' + d.getDate()).slice(-2)
     const month = d.getMonth() + 1 // Since getMonth() returns month from 0-11 not 1-12
@@ -35,20 +36,47 @@ function init (dateStr) {
     return api('opSchedule', `/3027/${dt}`).then(opScs => {
       delete opScs.result[0]
       const promiseArr = opScs.result.map(function (opSchedule) {
-        // return the promise to array
+        if (opSchedule[18] !== 'Update' &&
+            opSchedule[18] !== 'New') {
+          const del = { delete: { _index: 'schedules', _id: opSchedule[0] } }
+          elasticList.push(del)
+          return scheduleModel.findOneAndUpdate({
+            id: opSchedule[0]
+          }, { status: 'Cancel' })
+        }
+
         return api('schedule', opSchedule[0])
           .then(schedule => {
-            if (schedule.hasOwnProperty('response')) {
-              console.log(opSchedule[0], schedule)
-              return scheduleModel.findOneAndUpdate({
-                id: opSchedule[0]
-              }, { status: 'Cancel' })
-            }
+            // if (schedule.hasOwnProperty('response')) {
+            //   console.log(opSchedule[0], schedule)
+            //   const del = { delete: { _index: 'schedules', _id: opSchedule[0] } }
+            //   elasticList.push(del)
+            //   return scheduleModel.findOneAndUpdate({
+            //     id: opSchedule[0]
+            //   }, { status: 'Cancel' })
+            // }
+            console.log('HEREEEEEEE', opSchedule[0], schedule.result.origin_id, schedule.result.destination_id)
             schedule.result.hash = '' + schedule.result.origin_id + schedule.result.destination_id
             schedule.result.amenities = JSON.parse(schedule.result.amenities)
             const idx = { index: { _index: 'schedules', _id: schedule.result.id } }
             const data = serialize(schedule.result)
             elasticList.push(idx, data)
+
+            // if (routeIds.indexOf(schedule.result.route_id) !== -1) {
+            //   routeIds.push(schedule.result.route_id)
+            // const route = {
+            //   routeId: schedule.result.route_id,
+            //   dest: '',
+            //   dest_id: schedule.result.destination_id,
+            //   origin: '',
+            //   origin_id: schedule.result.origin_id,
+            //   sort: 0,
+            //   isActive: true,
+            //   isPopular: true
+            // }
+            //   routes.push(route)
+            // }
+
             return scheduleModel.findOneAndUpdate({
               id: schedule.result.id
             }, schedule.result, { upsert: true })

@@ -34,7 +34,7 @@ function cities (req, res, next) {
 }
 
 function search (req, res, next) {
-  req.hash = '' + req.body.frm + req.body.whr
+  req.hash = parseInt('' + req.body.frm + req.body.whr)
   req.date = new Date(`${req.body.date}T00:00:00.000Z`)
   return elastic.search({
     index: 'schedules',
@@ -57,7 +57,7 @@ function search (req, res, next) {
 function available (req, res, next) {
   // TODO check travel date gte than current date
   return scheduleModel.findOne({
-    travel_date: { $gte: Date.now() },
+    travel_date: { $gte: Date.UTC() },
     id: req.query.sid
   }).select({
     _id: 0,
@@ -101,10 +101,15 @@ function poupular (req, res, next) {
   if (lruCache.peek('popular')) {
     return res.json(_resp(lruCache.get('popular')))
   }
-
   return routeModel.find({
     isActive: true,
     isPopular: true
+  }).select({
+    _id: 0,
+    origin: 1,
+    origin_id: 1,
+    dest: 1,
+    dest_id: 1
   }).then(routeData => {
     lruCache.set('popular', routeData)
     return res.json(_resp(routeData))
@@ -132,7 +137,7 @@ function queryBuilder (req) {
 
   query.bool.must.push(_gen('hash', req.hash))
   query.bool.must.push(_gen('travel_date', req.date.getTime()))
-  query.bool.must.push(_range('travel_date', { gte: Date.now() }))
+  query.bool.must.push(_range('travel_date', { gt: Date.UTC() }))
 
   if (req.body.hasOwnProperty('amenities')) {
     req.body.amenities.forEach(amenity => {

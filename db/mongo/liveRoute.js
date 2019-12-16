@@ -2,11 +2,11 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const liveRouteSchema = new Schema({
-  key: Number,
-  dest: String,
-  dest_id: Number,
+  routeId: Number,
   origin: String,
   origin_id: Number,
+  dest: String,
+  dest_id: Number,
   sort: Number,
   isActive: Boolean,
   isPopular: Boolean
