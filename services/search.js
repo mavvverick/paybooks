@@ -104,7 +104,6 @@ function poupular (req, res, next) {
   if (lruCache.peek('popular')) {
     return res.json(_resp(lruCache.get('popular')))
   }
-
   return sql.Route.findAll({
     attributes: ['origin_id', 'dest_id'],
     where: {
@@ -134,20 +133,17 @@ function poupular (req, res, next) {
   }).catch(err => {
     next(error(err))
   })
+}
 
-  // return routeModel.find({
-  //   isActive: true,
-  //   isPopular: true
-  // }).select({
-  //   _id: 0,
-  //   origin: 1,
-  //   origin_id: 1,
-  //   dest: 1,
-  //   dest_id: 1
-  // }).then(routeData => {
-  //   lruCache.set('popular', routeData)
-  //   return res.json(_resp(routeData))
-  // })
+function getTime (someDate) {
+  const today = new Date()
+  if (someDate.getDate() === today.getDate() &&
+    someDate.getMonth() === today.getMonth() &&
+    someDate.getFullYear() === today.getFullYear()) {
+    return today.getHours() + ':' + today.getMinutes()
+  } else {
+    return false
+  }
 }
 
 module.exports = {
@@ -171,6 +167,15 @@ function queryBuilder (req) {
 
   query.bool.must.push(_gen('hash', req.hash))
   query.bool.must.push(_gen('travel_date', req.date.getTime()))
+
+  const timeCheck = getTime(req.date)
+
+  if (timeCheck) {
+    query.bool.must.push(_range('dep_time', { gte: timeCheck }))
+  }
+
+  console.log('++++++++++++', timeCheck)
+
   // query.bool.must.push(_range('travel_date', { gt: Date.UTC() }))
 
   if (req.body.hasOwnProperty('amenities')) {

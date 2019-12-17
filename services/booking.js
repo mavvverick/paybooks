@@ -31,6 +31,7 @@ async function initBooking (req, res, next) {
     .then(bookRecord => {
       return api('book', [req.body.sId, booking])
         .then(bookingData => {
+          console.log(bookingData)
           if (bookingData.hasOwnProperty('response')) {
             throw new CError({
               status: bookingData.response.code,
