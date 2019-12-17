@@ -4,6 +4,7 @@ const _resp = require('../lib/resp')
 const scheduleModel = require('../db/mongo/schedule')
 const routeModel = require('../db/mongo/liveRoute')
 const api = require('../lib/bitla')
+const sql = require('../db/sql')
 const elastic = require('../config/elasticsearch')
 const lruCache = require('../config/lruCache')
 
@@ -56,8 +57,10 @@ function search (req, res, next) {
 
 function available (req, res, next) {
   // TODO check travel date gte than current date
+  const timeOffset = new Date()
+  timeOffset.setHours(5, 29, 0)
   return scheduleModel.findOne({
-    travel_date: { $gte: Date.UTC() },
+    travel_date: { $gte: timeOffset },
     id: req.query.sid
   }).select({
     _id: 0,
@@ -101,19 +104,50 @@ function poupular (req, res, next) {
   if (lruCache.peek('popular')) {
     return res.json(_resp(lruCache.get('popular')))
   }
-  return routeModel.find({
-    isActive: true,
-    isPopular: true
-  }).select({
-    _id: 0,
-    origin: 1,
-    origin_id: 1,
-    dest: 1,
-    dest_id: 1
+
+  return sql.Route.findAll({
+    attributes: ['origin_id', 'dest_id'],
+    where: {
+      isActive: true
+    },
+    include: [{
+      model: sql.City,
+      as: 'origin',
+      attributes: ['name']
+    }, {
+      model: sql.City,
+      as: 'dest',
+      attributes: ['name']
+    }]
   }).then(routeData => {
-    lruCache.set('popular', routeData)
-    return res.json(_resp(routeData))
+    const routes = []
+    routeData.forEach(route => {
+      routes.push({
+        origin_id: route.origin_id,
+        dest_id: route.origin_id,
+        dest: route.dest.name,
+        origin: route.origin.name
+      })
+    })
+    lruCache.set('popular', routes)
+    return res.json(_resp(routes))
+  }).catch(err => {
+    next(error(err))
   })
+
+  // return routeModel.find({
+  //   isActive: true,
+  //   isPopular: true
+  // }).select({
+  //   _id: 0,
+  //   origin: 1,
+  //   origin_id: 1,
+  //   dest: 1,
+  //   dest_id: 1
+  // }).then(routeData => {
+  //   lruCache.set('popular', routeData)
+  //   return res.json(_resp(routeData))
+  // })
 }
 
 module.exports = {
