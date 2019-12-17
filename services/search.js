@@ -140,7 +140,14 @@ function getTime (someDate) {
   if (someDate.getDate() === today.getDate() &&
     someDate.getMonth() === today.getMonth() &&
     someDate.getFullYear() === today.getFullYear()) {
-    return today.getHours() + ':' + today.getMinutes()
+    const currentOffset = today.getTimezoneOffset()
+    const ISTOffset = 330 // IST offset UTC +5:30
+    const ISTTime = new Date(today.getTime() + (ISTOffset + currentOffset) * 60000)
+    const hrs = ('0' + ISTTime.getHours()).slice(-2)
+    const min = ('0' + ISTTime.getMinutes()).slice(-2)
+
+    return hrs + ':' + min
+    // return today.getHours() + ':' + today.getMinutes()
   } else {
     return false
   }
@@ -173,10 +180,6 @@ function queryBuilder (req) {
   if (timeCheck) {
     query.bool.must.push(_range('dep_time', { gte: timeCheck }))
   }
-
-  console.log('++++++++++++', timeCheck)
-
-  // query.bool.must.push(_range('travel_date', { gt: Date.UTC() }))
 
   if (req.body.hasOwnProperty('amenities')) {
     req.body.amenities.forEach(amenity => {
