@@ -17,9 +17,11 @@ function getSchedule (req, res, next) {
   req.data.totalAmount = 0
   req.data.validSeats = []
   req.data.rawSeats = []
+  const timeOffset = new Date()
+  timeOffset.setHours(5, 29, 0)
   return scheduleModel.findOne({
     id: req.body.sId,
-    travel_date: { $gt: Date.now() }
+    travel_date: { $gte: timeOffset }
   }).select(params).lean().then(busDetails => {
     if (!busDetails) {
       throw new CError({

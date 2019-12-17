@@ -137,7 +137,7 @@ function queryBuilder (req) {
 
   query.bool.must.push(_gen('hash', req.hash))
   query.bool.must.push(_gen('travel_date', req.date.getTime()))
-  query.bool.must.push(_range('travel_date', { gt: Date.UTC() }))
+  // query.bool.must.push(_range('travel_date', { gt: Date.UTC() }))
 
   if (req.body.hasOwnProperty('amenities')) {
     req.body.amenities.forEach(amenity => {

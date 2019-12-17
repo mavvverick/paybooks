@@ -21,6 +21,7 @@ module.exports = {
   duration: 1,
   'passenger_details.name': 1,
   'passenger_details.mobile': 1,
+  'passenger_details.email': 1,
   'seat_fare_details.seat_detail.seat_number': 1,
   'seat_fare_details.seat_detail.status': 1,
   'seat_fare_details.seat_detail.fare': 1,
