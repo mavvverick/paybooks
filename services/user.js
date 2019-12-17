@@ -1,12 +1,13 @@
 const CError = require('../errors/cError')
 const sql = require('../db/sql')
-const Op = sql.Sequelize.Op
 const error = require('http-errors')
 const _resp = require('../lib/resp')
 const sendSms = require('../lib/sms')
-const bus = require('../db/mongo/bus')
+const reviewModel = require('../db/mongo/review')
 const bookModel = require('../db/mongo/bookings')
 const bookParams = require('../utils/bookschema')
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 function getProfile (req, res, next) {
   return res.json(_resp(req.user))
@@ -66,6 +67,10 @@ function sendTicket (req, res, next) {
       const dateString = day.getDate() + '-' + (day.getMonth() + 1) + '-' + day.getFullYear()
       const msg = `YoloBus:${booking.ticket_number},${journeyDetails} PNR:YO-${booking.operator_pnr},DOJ:${dateString},Time:${booking.dep_time},seats:${booking.seat_numbers}`
 
+      if (booking.passenger_detail.email) {
+        sendEmail(booking.passenger_detail.email, booking.ticket_number, msg)
+      }
+
       // TODO ticket url
       // TODO ticket message format
       // `PNR: ${pnr},Bus:15609,DOJ:22-06-2014,TIME:22:00,3A,GHY TO ROK,RAJAN,B1 35,FARE:1670,SC:22.47+PG CHGS.`
@@ -80,10 +85,11 @@ function sendTicket (req, res, next) {
 }
 
 function rating (req, res, next) {
-  return bus.updateOne({
-    bId: req.body.bId
-  }, {
-    $inc: { 'rating.num': req.body.rating, 'rating.users': 1 }
+  return reviewModel.create({
+    sId: req.body.bId,
+    user: req.user.userId,
+    cmnt: req.body.comment,
+    rt: req.body.rating
   }).then(data => {
     res.json(_resp('OK'))
   }).catch(err => {
@@ -116,6 +122,17 @@ function refunds (req, res, next) {
 
 function updateProfile (req, res, next) {
 
+}
+
+function sendEmail (email, pnr, txt) {
+  const msg = {
+    to: email, // receiver's email
+    from: 'support@yolobus.in', // sender's email
+    subject: `Confirmation Booking for PNR ${pnr}`, // Subject
+    text: txt // content
+    // html: 'and easy to do anywhere, even with Node.js'// HTML content
+  }
+  sgMail.send(msg)
 }
 
 module.exports = {
