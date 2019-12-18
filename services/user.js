@@ -65,19 +65,18 @@ function sendTicket (req, res, next) {
 
       let seats = ''
       booking.seat_fare_details.forEach(seatData => {
-        if(seatData.seat_detail.status ==="DONE"){
-          seats += seatData.seat_detail.seat_number +  "," 
+        if (seatData.seat_detail.status === 'DONE') {
+          seats += seatData.seat_detail.seat_number + ','
         }
       })
 
-      if(seats === ''){
+      if (seats === '') {
         throw new CError({
           status: 404,
           message: 'No active seats for booking.',
           name: 'NotFound'
         })
       }
-
 
       const day = new Date(booking.travel_date)
       const journeyDetails = booking.origin + ' To ' + booking.destination
@@ -146,7 +145,7 @@ function sendEmail (user, booking, journeyDetails, seats) {
     to: user.email, // receiver's email
     from: 'support@yolobus.in', // sender's email
     subject: `YoloBus Ticket Confirmation for ${booking.ticket_number}`, // Subject
-    html : `<!doctype html><html>
+    html: `<!doctype html><html>
       <head>
         <meta name="viewport" content="width=device-width" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -502,7 +501,6 @@ function sendEmail (user, booking, journeyDetails, seats) {
   }
 
   sgMail.send(msg)
-  
 }
 
 module.exports = {

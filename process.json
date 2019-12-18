@@ -5,7 +5,7 @@
             "script": "index.js",
             "merge_logs": true,
             "max_restarts": 20,
-            "instances": 1,
+            "instances": 2,
             "out_file" : "/tmp/yolo.log",
             "log_date_format" : "DD/MM/YYYY HH:mm:ss",
             "max_memory_restart": "1G",

@@ -123,7 +123,7 @@ function poupular (req, res, next) {
     routeData.forEach(route => {
       routes.push({
         origin_id: route.origin_id,
-        dest_id: route.origin_id,
+        dest_id: route.dest_id,
         dest: route.dest.name,
         origin: route.origin.name
       })
