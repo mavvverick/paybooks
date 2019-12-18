@@ -90,7 +90,7 @@ function sendTicket (req, res, next) {
       // TODO ticket url
       // TODO ticket message format
       // `PNR: ${pnr},Bus:15609,DOJ:22-06-2014,TIME:22:00,3A,GHY TO ROK,RAJAN,B1 35,FARE:1670,SC:22.47+PG CHGS.`
-      sendSms(req.user.phNumber, msg)
+      sendSms(booking.passenger_details.mobile, msg)
         .catch(err => {
           throw err
         })
