@@ -102,11 +102,18 @@ function sendTicket (req, res, next) {
 
 function rating (req, res, next) {
   return reviewModel.create({
-    sId: req.body.bId,
+    sId: req.body.sId,
     user: req.user.userId,
     cmnt: req.body.comment,
     rt: req.body.rating
   }).then(data => {
+    bookModel.updateOne({
+      ticket_number: req.body.sId,
+      isRate: false
+    }, { isRate: true }).catch(err => {
+      console.log(err)
+    })
+
     res.json(_resp('OK'))
   }).catch(err => {
     next(error(err))

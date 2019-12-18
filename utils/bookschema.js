@@ -29,5 +29,6 @@ module.exports = {
   'seat_fare_details.seat_detail.offer_discount': 1,
   'seat_fare_details.seat_detail.discount': 1,
   origin: 1,
-  destination: 1
+  destination: 1,
+  isRate: 1
 }

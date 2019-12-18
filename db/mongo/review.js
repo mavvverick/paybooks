@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const reviewSchema = new Schema({
-  sId: Number,
+  sId: String,
   user: String,
   cmnt: String,
   rt: Number

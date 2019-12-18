@@ -171,7 +171,11 @@ const bookingSchema = new Schema({
   operator_seat_wise_pnr: {
     type: 'String'
   },
-  gst: Object
+  gst: Object,
+  isRate: {
+    type: 'Boolean',
+    default: false
+  }
 }, {
   timestamps: true
 })
