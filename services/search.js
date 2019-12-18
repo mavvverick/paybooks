@@ -56,9 +56,8 @@ function search (req, res, next) {
 }
 
 function available (req, res, next) {
-  // TODO check travel date gte than current date
   const timeOffset = new Date()
-  timeOffset.setHours(5, 29, 0)
+  timeOffset.setUTCHours(0, 0, 0, 0)
   return scheduleModel.findOne({
     travel_date: { $gte: timeOffset },
     id: req.query.sid
@@ -145,7 +144,6 @@ function getTime (someDate) {
     const ISTTime = new Date(today.getTime() + (ISTOffset + currentOffset) * 60000)
     const hrs = ('0' + ISTTime.getHours()).slice(-2)
     const min = ('0' + ISTTime.getMinutes()).slice(-2)
-
     return hrs + ':' + min
     // return today.getHours() + ':' + today.getMinutes()
   } else {
