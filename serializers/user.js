@@ -20,8 +20,9 @@ const send = {
 
 const rate = {
   body: {
-    bId: Joi.number().required(),
-    rating: Joi.number().required()
+    sId: Joi.string().required(),
+    rating: Joi.number().required(),
+    comment: Joi.string()
   }
 }
 
