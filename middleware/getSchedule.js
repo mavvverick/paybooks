@@ -18,7 +18,7 @@ function getSchedule (req, res, next) {
   req.data.validSeats = []
   req.data.rawSeats = []
   const timeOffset = new Date()
-  timeOffset.setHours(5, 29, 0)
+  timeOffset.setUTCHours(0, 0, 0, 0)
   return scheduleModel.findOne({
     id: req.body.sId,
     travel_date: { $gte: timeOffset }
