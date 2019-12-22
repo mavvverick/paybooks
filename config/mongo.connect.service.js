@@ -14,7 +14,8 @@ if (process.env.NODE_ENV === 'test') {
 }
 mongoose.Promise = require('bluebird')
 mongoose.connect(MongoUrl, {
-  useNewUrlParser: true
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 })
 // mongoose.set('debug', true)
 mongoose.connection.on('error', (err) => {

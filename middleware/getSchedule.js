@@ -1,4 +1,3 @@
-const cache = require('../lib/cache')
 const CError = require('../errors/cError')
 const error = require('http-errors')
 const scheduleModel = require('../db/mongo/schedule')
