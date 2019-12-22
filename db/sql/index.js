@@ -46,7 +46,7 @@ sequelize
     console.error('Unable to connect to the database:', err)
   })
 
-sequelize.sync()
+// sequelize.sync()
 db.sequelize = sequelize
 db.Sequelize = Sequelize
 

@@ -26,15 +26,12 @@ module.exports = function apiErrorHandler () {
           error: {
             code: err.code,
             message: err.message,
-            debug: err.errors,
-            type: err.name,
-            notes: err.notes,
-            apkUrl: err.apkUrl,
-            apkSize: err.apkSize,
-            psUpdate: err.psUpdate,
-            psPackage: err.psPackage
+            type: err.name
           }
         }
+      }
+      if (process.env.NODE_ENV !== 'production') {
+        body.yolo.error.debug = err.errors
       }
     }
     // if (!production) body.bettr.__debug__ = JSON.stringify(err.stack);
