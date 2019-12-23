@@ -18,26 +18,28 @@ function initOtp (req, res, next) {
       }
     }).then(row => {
     if (row < 1) {
-      return sql.User.create({
+      const userData = {
         userId: generate(alphabet, 15),
         phNumber: req.body.phone,
         otp: otp + '|' + (Date.now() + 300000),
         model: req.data.deviceName,
         androidId: req.data.deviceId,
         imeiNumber: req.data.device
-      }).then(user => {
-        return _sendOtp()
+      }
+
+      if (req.body.hasOwnProperty('code') &&
+      req.body.code === process.env.AGENT_CODE) {
+        userData.isAgent = true
+      }
+
+      return sql.User.create(userData).then(user => {
+        return _sendOtp().then(data => {
+          res.json(_resp('OK'))
+        })
       })
     }
+
     return _sendOtp().then(data => {
-      // TODO
-      // if (data.type === 'success') {
-      //   throw CError({
-      //     status: 404,
-      //     message: data.type,
-      //     name: 'NotFound'
-      //   })
-      // }
       res.json(_resp('OK'))
     })
   }).catch(err => {

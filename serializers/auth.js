@@ -2,7 +2,8 @@ const Joi = require('joi')
 
 const init = {
   body: {
-    phone: Joi.string().regex(/^[0-9]{10}$/).required()
+    phone: Joi.string().regex(/^[0-9]{10}$/).required(),
+    code: Joi.string()
   }
 }
 
