@@ -69,7 +69,8 @@ function commit (req, res, next) {
         amount: sql.Sequelize.literal(`amount + ${parseFloat(tranInst.amount)}`)
       }, {
         where: {
-          userId: req.user.userId
+          userId: req.user.userId,
+          isAgent: true
         },
         transaction: t
       })
@@ -99,7 +100,8 @@ function initBooking (req, res, next) {
     // busCreateData = _serializeBusData(req)
     return sql.User.findOne({
       where: {
-        userId: req.user.userId
+        userId: req.user.userId,
+        isAgent: true
       },
       transaction: t,
       lock: t.LOCK.UPDATE
@@ -186,7 +188,8 @@ function getWalletBalance (req, res, next) {
   return sql.User.findOne({
     attributes: ['amount', 'tokens'],
     where: {
-      userId: req.user.userId
+      userId: req.user.userId,
+      isAgent: true
     }
   }).then(user => {
     if (!user) {
