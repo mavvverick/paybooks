@@ -7,6 +7,7 @@ const api = require('../lib/bitla')
 const tools = require('../utils/tools')
 const bookModel = require('../db/mongo/bookings')
 const cancelModel = require('../db/mongo/cancel')
+const sendSms = require('../lib/sms')
 
 function initWallet (req, res, next) {
   let tranInst
@@ -236,6 +237,11 @@ function cancel (req, res, next) {
         data.result.cancel_ticket.reason = req.body.reason
         return cancelModel.create(data.result.cancel_ticket)
           .then(cancelRecords => {
+            const msg = `YoloBus: cancellation request scuccessful for seats: ${req.body.seats} against ticket number ${booking.ticket_number}`
+            sendSms(booking.passenger_details.mobile, msg)
+              .catch(err => {
+                throw err
+              })
             return sql.sequelize.transaction(t => {
               return sql.Transaction.create({
                 userId: req.user.userId,

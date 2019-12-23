@@ -38,7 +38,7 @@ function initOtp (req, res, next) {
       //     name: 'NotFound'
       //   })
       // }
-      res.json(_resp(otp.toString()))
+      res.json(_resp('OK'))
     })
   }).catch(err => {
     next(error(err))
