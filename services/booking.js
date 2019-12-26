@@ -42,14 +42,14 @@ async function initBooking (req, res, next) {
           bookData = bookingData
 
           return rzp.orders.create({
-            amount: (req.data.totalAmount + req.data.tax) * 100,
+            amount: req.data.totalAmount * 100,
             currency: 'INR',
             receipt: bookingData.result.ticket_details.pnr_number,
             payment_capture: 1,
             notes: {
               user: req.user.userId,
               amount: req.data.totalAmount,
-              tax: req.data.tax
+              tax: req.data.taxPercent
             }
           })
         }).then(rzpRecord => {

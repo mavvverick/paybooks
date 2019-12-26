@@ -95,7 +95,7 @@ function commit (req, res, next) {
 
 function initBooking (req, res, next) {
   let pnr
-  const finalAmount = req.data.totalAmount + req.data.tax
+  const finalAmount = req.data.totalAmount
   return sql.sequelize.transaction(t => {
     // busCreateData = _serializeBusData(req)
     return sql.User.findOne({
@@ -107,7 +107,7 @@ function initBooking (req, res, next) {
       lock: t.LOCK.UPDATE
     }).then(userData => {
       // TODO add comission
-      if (userData.amount <= finalAmount) {
+      if (userData.amount < finalAmount) {
         throw Error('Low wallet balance')
       }
       userData.decrement({
@@ -139,7 +139,7 @@ function initBooking (req, res, next) {
             return sql.Transaction.create({
               userId: req.user.userId,
               amount: finalAmount,
-              fee: req.data.tax,
+              fee: req.data.taxPercent,
               category: 'BOOK',
               orderId: pnr,
               status: 'DONE',

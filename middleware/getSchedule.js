@@ -50,7 +50,7 @@ function getSchedule (req, res, next) {
         })
       }
 
-      req.data.tax = getTax(req.data.totalAmount, req.data.schedule.service_tax_percent)
+      req.data.taxPercent = req.data.schedule.service_tax_percent
       return next()
     })
   }).catch(err => {
@@ -62,8 +62,4 @@ module.exports = getSchedule
 
 function getFare (req) {
   return api('availability', req.body.sId)
-}
-
-function getTax (amount, taxPercent) {
-  return (taxPercent * amount) / 100
 }
