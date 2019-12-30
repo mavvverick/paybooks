@@ -10,7 +10,14 @@ const sgMail = require('@sendgrid/mail')
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 function getProfile (req, res, next) {
-  return res.json(_resp(req.user))
+  return sql.User.findOne({
+    attributes: ['name', 'dob', 'gender', 'email', 'phNumber'],
+    where: { userId: req.user.userId }
+  }).then(user => {
+    res.json(_resp(user))
+  }).catch(err => {
+    next(error(err))
+  })
 }
 
 function getMyBookings (req, res, next) {
