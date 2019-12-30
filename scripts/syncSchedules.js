@@ -26,7 +26,7 @@ function getDates (startDate, noOfDays) {
 
 function init (dateStr) {
   const elasticList = []
-  var dates = getDates(new Date(), 90)
+  var dates = getDates(new Date(), 1)
 
   dates.forEach(function (d) {
     const date = ('0' + d.getDate()).slice(-2)

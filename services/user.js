@@ -144,7 +144,13 @@ function refunds (req, res, next) {
 }
 
 function updateProfile (req, res, next) {
-
+  return sql.User.update(req.body, {
+    where: { userId: req.user.userId }
+  }).then(row => {
+    res.json(_resp('OK'))
+  }).catch(err => {
+    next(error(err))
+  })
 }
 
 function sendEmail (user, booking, journeyDetails, seats) {

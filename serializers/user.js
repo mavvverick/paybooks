@@ -28,7 +28,10 @@ const rate = {
 
 const update = {
   body: {
-
+    name: Joi.string(),
+    dob: Joi.string(),
+    gender: Joi.string(),
+    email: Joi.string()
   }
 }
 

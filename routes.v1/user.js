@@ -5,6 +5,7 @@ const validate = require('express-validation')
 const router = express.Router()
 
 router.get('/me', userService.getProfile)
+router.put('/me', validate(params.update), userService.updateProfile)
 router.get('/bookings', validate(params.booking), userService.getMyBookings)
 router.get('/bookings/:bookId', validate(params.bookDetail), userService.getBookingById)
 router.get('/refunds', userService.refunds)

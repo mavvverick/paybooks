@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
     otp: DataTypes.STRING(50),
     isVerified: DataTypes.BOOLEAN,
     name: DataTypes.STRING,
+    email: DataTypes.STRING,
+    dob: DataTypes.STRING,
+    gender: {
+      type: DataTypes.ENUM,
+      values: ['MALE', 'FEMALE', 'OTHERS']
+    },
     firstTimeUser: DataTypes.BOOLEAN,
     avatarUrl: DataTypes.STRING(20),
     isActive: {
