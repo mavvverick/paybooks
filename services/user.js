@@ -11,7 +11,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 function getProfile (req, res, next) {
   return sql.User.findOne({
-    attributes: ['name', 'dob', 'gender', 'email', 'phNumber'],
+    attributes: ['userId', 'name', 'dob', 'gender', 'email', 'phNumber', 'isAgent'],
     where: { userId: req.user.userId }
   }).then(user => {
     res.json(_resp(user))
