@@ -48,8 +48,19 @@ function search (req, res, next) {
     let data = []
     if (cities.hasOwnProperty('hits')) {
       data = cities.hits.hits
+      data[0]._source.available = 12
     }
-    res.json(_resp(data))
+
+    const promiseArr = data.map(function (source) {
+      const sid = source._source.id
+      return api('availability', sid).then(avalibality => {
+        source._source.available = avalibality.result[1][2]
+      })
+    })
+
+    Promise.all(promiseArr).then(ee => {
+      res.json(_resp(data))
+    })
   }).catch(err => {
     next(error(err))
   })
@@ -78,13 +89,14 @@ function available (req, res, next) {
     }
     return api('availability', req.query.sid)
       .then(data => {
-        elastic.updateDocument(
-          'schedules',
-          req.query.sid,
-          { doc: { available: data.result[1][2] } }
-        ).catch(err => {
-          console.log(err)
-        })
+        // Update available data to elastic search
+        // elastic.updateDocument(
+        //   'schedules',
+        //   req.query.sid,
+        //   { doc: { available: data.result[1][2] } }
+        // ).catch(err => {
+        //   console.log(err)
+        // })
 
         schedule.available = {
           num: data.result[1][2],
