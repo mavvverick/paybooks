@@ -48,7 +48,6 @@ function search (req, res, next) {
     let data = []
     if (cities.hasOwnProperty('hits')) {
       data = cities.hits.hits
-      data[0]._source.available = 12
     }
 
     const promiseArr = data.map(function (source) {
