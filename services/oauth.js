@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken')
 const generate = require('nanoid/generate')
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const _resp = require('../lib/resp')
+const AgentCommissionPercentage = parseInt(process.env.AGENT_COMMISSION_PERCT)
+
 function initOtp (req, res, next) {
   const otp = Math.floor(1000 + Math.random() * 9000)
   return sql.User.update(
@@ -30,6 +32,7 @@ function initOtp (req, res, next) {
       if (req.body.hasOwnProperty('code') &&
       req.body.code === process.env.AGENT_CODE) {
         userData.isAgent = true
+        userData.commPerct = AgentCommissionPercentage
       }
 
       return sql.User.create(userData).then(user => {

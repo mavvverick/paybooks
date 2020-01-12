@@ -121,8 +121,10 @@ function initBooking (req, res, next) {
         total_fare: finalAmount,
         seatMeta: req.body.seats,
         seats: req.data.rawSeats,
-        userId: req.user.userId
+        userId: req.user.userId,
+        yolo_agent_comm_perct: req.data.agent_commission_perct
       }
+
       return bookModel.create(bookData).then(bookRecord => {
         return api('book', [req.body.sId, booking])
           .then(bookingData => {
@@ -186,7 +188,7 @@ function initBooking (req, res, next) {
 
 function getWalletBalance (req, res, next) {
   return sql.User.findOne({
-    attributes: ['amount', 'tokens'],
+    attributes: ['amount', 'tokens', 'commPerct'],
     where: {
       userId: req.user.userId,
       isAgent: true

@@ -7,6 +7,7 @@ const reviewModel = require('../db/mongo/review')
 const bookModel = require('../db/mongo/bookings')
 const bookParams = require('../utils/bookschema')
 const sgMail = require('@sendgrid/mail')
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 function getProfile (req, res, next) {
@@ -21,6 +22,10 @@ function getProfile (req, res, next) {
 }
 
 function getMyBookings (req, res, next) {
+  if (req.user.isAgent) {
+    bookParams.yolo_agent_comm_perct = 1
+  }
+
   return bookModel.find({
     userId: req.user.userId
   }).select(bookParams).then(bookings => {
@@ -38,6 +43,10 @@ function getMyBookings (req, res, next) {
 }
 
 function getBookingById (req, res, next) {
+  if (req.user.isAgent) {
+    bookParams.yolo_agent_comm_perct = 1
+  }
+
   return bookModel.find({
     ticket_number: req.params.bookId,
     userId: req.user.userId

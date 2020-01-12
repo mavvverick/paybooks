@@ -65,6 +65,9 @@ const bookingSchema = new Schema({
   ticket_number: {
     type: 'String'
   },
+  yolo_agent_comm_perct: {
+    type: Number
+  },
   operator_pnr: {
     type: 'String'
   },

@@ -1,7 +1,9 @@
 const CError = require('../errors/cError')
 const error = require('http-errors')
 const scheduleModel = require('../db/mongo/schedule')
+const sql = require('../db/sql')
 const api = require('../lib/bitla')
+const AgentCommissionPercentage = parseInt(process.env.AGENT_COMMISSION_PERCT)
 
 function getSchedule (req, res, next) {
   const params = {
@@ -50,8 +52,29 @@ function getSchedule (req, res, next) {
         })
       }
 
-      req.data.taxPercent = req.data.schedule.service_tax_percent
-      return next()
+      if (req.user.isAgent) {
+        return sql.User.findOne({
+          attributes: ['commPerct'],
+          where: {
+            userId: req.user.userId,
+            isAgent: true
+          }
+        }).then(user => {
+          if (!user) {
+            throw new CError({
+              status: 409,
+              message: 'Agent not found',
+              name: 'NotFound'
+            })
+          }
+          req.data.totalAmount = req.data.totalAmount - getAgentCommission(req.data.totalAmount, user.commPerct)
+          req.data.agent_commission_perct = user.commPerct
+          return next()
+        })
+      } else {
+        req.data.taxPercent = req.data.schedule.service_tax_percent
+        return next()
+      }
     })
   }).catch(err => {
     next(error(err))
@@ -62,4 +85,8 @@ module.exports = getSchedule
 
 function getFare (req) {
   return api('availability', req.body.sId)
+}
+
+function getAgentCommission (amount, commPerct) {
+  return (commPerct * amount) / 100
 }

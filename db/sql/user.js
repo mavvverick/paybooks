@@ -59,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     commPerct: {
       type: DataTypes.INTEGER,
-      defaultValue: null
+      defaultValue: 0
     },
     gst: {
       type: DataTypes.TEXT,

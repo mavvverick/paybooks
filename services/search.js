@@ -37,6 +37,7 @@ function cities (req, res, next) {
 function search (req, res, next) {
   req.hash = parseInt('' + req.body.frm + req.body.whr)
   req.date = new Date(`${req.body.date}T00:00:00.000Z`)
+
   return elastic.search({
     index: 'schedules',
     filter_path: 'hits.hits._source',
@@ -50,16 +51,17 @@ function search (req, res, next) {
       data = cities.hits.hits
     }
 
-    const promiseArr = data.map(function (source) {
-      const sid = source._source.id
-      return api('availability', sid).then(avalibality => {
-        source._source.available = avalibality.result[1][2]
-      })
-    })
+    // const promiseArr = data.map(function (source) {
+    //   const sid = source._source.id
+    //   return api('availability', sid).then(avalibality => {
+    //     source._source.available = avalibality.result[1][2]
+    //   })
+    // })
 
-    Promise.all(promiseArr).then(ee => {
-      res.json(_resp(data))
-    })
+    // Promise.all(promiseArr).then(ee => {
+    //   res.json(_resp(data))
+    // })
+    res.json(_resp(data))
   }).catch(err => {
     next(error(err))
   })
