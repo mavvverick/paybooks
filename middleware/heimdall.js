@@ -39,32 +39,33 @@ const auth = (req, res, next) => {
 }
 
 const dummyUser = (req, res, next) => {
-  const users = [{
-    userId: 'ANON1',
-    phNumber: '9315612997',
-    isAgent: false
-  }, {
-    userId: 'ANON2',
-    phNumber: '9087654321',
-    isAgent: true
-  }]
+  // const users = [{
+  //   userId: 'ANON1',
+  //   phNumber: '9315612997',
+  //   isAgent: false
+  // }, {
+  //   userId: 'ANON2',
+  //   phNumber: '9087654321',
+  //   isAgent: true
+  // }]
 
-  if (Object.keys(req.body).length > 0 && req.body.hasOwnProperty('userId')) {
-    req.user = getUserById(req.body.userId)
-    delete req.body.userId
-  } else {
-    req.user = users[0]
-  };
+  // if (Object.keys(req.body).length > 0 && req.body.hasOwnProperty('userId')) {
+  //   req.user = getUserById(req.body.userId)
+  //   delete req.body.userId
+  // } else {
+  //   req.user = users[0]
+  // };
 
-  function getUserById (userId) {
-    return users.filter(user => user.userId === userId)[0]
-  }
+  // function getUserById (userId) {
+  //   return users.filter(user => user.userId === userId)[0]
+  // }
 
-  if (req.user) {
-    next()
-  } else {
-    next(error(401, 'No user found'))
-  }
+  // if (req.user) {
+  //   next()
+  // } else {
+  //   next(error(401, 'No user found'))
+  // }
+  next()
 }
 
 module.exports = {

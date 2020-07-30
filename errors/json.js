@@ -22,16 +22,17 @@ module.exports = function apiErrorHandler () {
       }
     } else {
       body = {
-        yolo: {
-          error: {
-            code: err.code,
-            message: err.message,
-            type: err.name
-          }
-        }
+        status: {
+          http_status_code: status
+        },
+        errors: [{
+          code: err.code,
+          message: err.message,
+          type: err.name
+        }]
       }
       if (process.env.NODE_ENV !== 'production') {
-        body.yolo.error.debug = err.errors
+        body.debug = err.errors
       }
     }
     // if (!production) body.bettr.__debug__ = JSON.stringify(err.stack);

@@ -7,19 +7,11 @@ const routesv1 = require('./routes.v1/index')
 const errorHandler = require('./errors/json')
 const CError = require('./errors/cError')
 const dataLayer = require('./middleware/dataLayer')
-require('./config/mongo.connect.service')
+// require('./config/mongo.connect.service')
 app.use(helmet())
 app.disable('x-powered-by')
-
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-
-// if (process.env.NODE_ENV === 'dev') {
-//   app.use(heimdall.dummyUser, dataLayer)
-// } else {
-//   app.use(heimdall.auth, dataLayer)
-// }
-
 app.use(dataLayer)
 
 app.use('/v1', routesv1)

@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 /**
  * Connect to MongoDB.
  */
-
+console.log(process.env.MONGODB_URI_DEV)
 let MongoUrl = ''
 if (process.env.NODE_ENV === 'test') {
   MongoUrl = process.env.MONGODB_URI_TEST

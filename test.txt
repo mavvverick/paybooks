@@ -1,2 +1,0 @@
-Connection has been established successfully.
-DONE

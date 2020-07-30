@@ -23,9 +23,8 @@
   },
   "homepage": "https://gitlab.com/pathfinder-19N33W/yolo#README",
   "dependencies": {
-    "@sendgrid/mail": "^6.4.0",
+    "chai-json-schema": "^1.5.1",
     "dotenv": "^8.1.0",
-    "elasticsearch": "^16.5.0",
     "express": "^4.17.1",
     "express-validation": "^1.0.2",
     "helmet": "^3.21.0",
@@ -33,15 +32,16 @@
     "joi": "^14.3.1",
     "jsonwebtoken": "^8.5.1",
     "lru-cache": "^5.1.1",
-    "mongoose": "^5.6.12",
+    "medici": "^4.0.1",
+    "mongoose": "^5.9.25",
     "mysql2": "^1.7.0",
-    "nanoid": "^2.1.0",
+    "paytm-pg-node-sdk": "^1.0.4",
     "razorpay": "^2.0.5",
-    "redis": "^2.8.0",
     "request": "^2.88.0",
     "sequelize": "^5.18.1"
   },
   "devDependencies": {
-    "standard": "^14.1.0"
+    "chai": "^4.2.0",
+    "mocha": "^8.0.1"
   }
 }
