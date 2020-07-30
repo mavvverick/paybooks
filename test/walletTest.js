@@ -21,265 +21,265 @@ const wallet = new Wallet({
   Currency: 'INR'
 })
 
-// describe('Wallet Test', () => {
-//   it('Flush db', (done) => {
-//     Models.Wallet.destroy({
-//       truncate: true
-//     })
-//     Models.Transaction.destroy({
-//       truncate: true
-//     })
-//     done()
-//   })
+describe('Wallet Test', () => {
+  it('Flush db', (done) => {
+    Models.Wallet.destroy({
+      truncate: true
+    })
+    Models.Transaction.destroy({
+      truncate: true
+    })
+    done()
+  })
 
-//   it('Create Wallets', (done) => {
-//     let count = 0
-//     data.accounts.forEach(account => {
-//       wallet.create(account)
-//         .then(res => {
-//           count += 1
-//           expect(res).to.be.an.instanceof(Models.Wallet)
-//           if (count === 2) {
-//             done()
-//           }
-//         }).catch(done)
-//     })
-//   })
+  it('Create Wallets', (done) => {
+    let count = 0
+    data.accounts.forEach(account => {
+      wallet.create(account)
+        .then(res => {
+          count += 1
+          expect(res).to.be.an.instanceof(Models.Wallet)
+          if (count === 2) {
+            done()
+          }
+        }).catch(done)
+    })
+  })
 
-//   it('Add money to  Wallets', (done) => {
-//     let count = 0
-//     data.sampleCredit.forEach(creditData => {
-//       wallet.credit(creditData)
-//         .then(res => {
-//           count += 1
-//           expect(res).to.be.an.instanceof(Models.Transaction)
-//           if (count === 2) {
-//             done()
-//           }
-//         }).catch(done)
-//     })
-//   })
+  it('Add money to  Wallets', (done) => {
+    let count = 0
+    data.sampleCredit.forEach(creditData => {
+      wallet.credit(creditData)
+        .then(res => {
+          count += 1
+          expect(res).to.be.an.instanceof(Models.Transaction)
+          if (count === 2) {
+            done()
+          }
+        }).catch(done)
+    })
+  })
 
-//   it('Debit transaction', (done) => {
-//     _getWalletsByUserId()
-//       .then(_debit)
-//       .then(res => {
-//         res.map(debitData => {
-//           return expect(debitData).to.be.an
-//             .instanceof(Models.Transaction)
-//         })
-//         done()
-//       })
-//       .catch(done)
-//   })
+  it('Debit transaction', (done) => {
+    _getWalletsByUserId()
+      .then(_debit)
+      .then(res => {
+        res.map(debitData => {
+          return expect(debitData).to.be.an
+            .instanceof(Models.Transaction)
+        })
+        done()
+      })
+      .catch(done)
+  })
 
-//   it('Credit transaction', (done) => {
-//     _getWalletsByUserId()
-//       .then(_credit)
-//       .then(res => {
-//         expect(res).to.be.an
-//           .instanceof(Models.Transaction)
+  it('Credit transaction', (done) => {
+    _getWalletsByUserId()
+      .then(_credit)
+      .then(res => {
+        expect(res).to.be.an
+          .instanceof(Models.Transaction)
 
-//         done()
-//       }).catch(done)
-//   })
+        done()
+      }).catch(done)
+  })
 
-//   it('Check transactions integrity', (done) => {
-//     Models.Transaction.findAll({
-//       where: {
-//         orderId: 'G123'
-//       }
-//     }).then(transactions => {
-//       let creditAmount = 0
-//       let debitAmount = 0
-//       transactions.forEach(data => {
-//         const transaction = data.toJSON()
-//         if (transaction.type === 'CR') {
-//           creditAmount += transaction.amount + transaction.fee
-//         } else {
-//           debitAmount += transaction.amount
-//         }
-//       })
-//       expect(debitAmount).to.equal(creditAmount)
-//       done()
-//     }).catch(done)
-//   })
-// })
+  it('Check transactions integrity', (done) => {
+    Models.Transaction.findAll({
+      where: {
+        orderId: 'G123'
+      }
+    }).then(transactions => {
+      let creditAmount = 0
+      let debitAmount = 0
+      transactions.forEach(data => {
+        const transaction = data.toJSON()
+        if (transaction.type === 'CR') {
+          creditAmount += transaction.amount + transaction.fee
+        } else {
+          debitAmount += transaction.amount
+        }
+      })
+      expect(debitAmount).to.equal(creditAmount)
+      done()
+    }).catch(done)
+  })
+})
 
 
-// describe('Concurrent wallet transaction', () => {
-//   let userId = data.users[0]
-//   let walletAccounts = [{
-//     userId: userId
-//   }, {
-//     userId: userId
-//   }]
+describe('Concurrent wallet transaction', () => {
+  let userId = data.users[0]
+  let walletAccounts = [{
+    userId: userId
+  }, {
+    userId: userId
+  }]
 
-//   it('Update INR  Money', (done) => {
-//     Models.Wallet.update({
-//       amount: 110.00
-//     }, {
-//       where: {
-//         userId: userId,
-//         currency: 'INR'
-//       }
-//     }).then(res => {
-//       expect(res[0]).to.equal(1)
-//       done()
-//     }).catch(done)
-//   })
+  it('Update INR  Money', (done) => {
+    Models.Wallet.update({
+      amount: 110.00
+    }, {
+      where: {
+        userId: userId,
+        currency: 'INR'
+      }
+    }).then(res => {
+      expect(res[0]).to.equal(1)
+      done()
+    }).catch(done)
+  })
 
-//   it('Withdraw INR transaction request', (done) => {
-//     wallet.withdraw(data.withdrawl)
-//       .then(res => {
-//         expect(res).to.be.an
-//           .instanceof(Models.Transaction)
-//         done()
-//       }).catch(done)
-//   })
+  it('Withdraw INR transaction request', (done) => {
+    wallet.withdraw(data.withdrawl)
+      .then(res => {
+        expect(res).to.be.an
+          .instanceof(Models.Transaction)
+        done()
+      }).catch(done)
+  })
 
-//   it('Perform transaction', (done) => {
-//     _debit(walletAccounts)
-//       .then(res => {
-//         done()
-//       }).catch(done)
-//   })
+  it('Perform transaction', (done) => {
+    _debit(walletAccounts)
+      .then(res => {
+        done()
+      }).catch(done)
+  })
 
-//   it('FAIL withdraw INR transaction request', (done) => {
-//     wallet.withdraw(data.withdrawl)
-//       .then(res => {
-//         expect(res).to.be.an
-//           .instanceof(Models.Transaction)
-//         done()
-//       }).catch(err => {
-//         expect(err).to.have.property('message', 'Low balance.')
-//         done()
-//       })
-//   })
+  it('FAIL withdraw INR transaction request', (done) => {
+    wallet.withdraw(data.withdrawl)
+      .then(res => {
+        expect(res).to.be.an
+          .instanceof(Models.Transaction)
+        done()
+      }).catch(err => {
+        expect(err).to.have.property('message', 'Low balance.')
+        done()
+      })
+  })
 
-// })
+})
 
 describe('Paytm Transactions', () => {
   let userId = data.users[0]
   let amount = 10
 
-  // it('Add money to wallet', (done) => {
-  //   wallet.initPayment(data.paymentInitData).then(res => {
-  //     Models.Transaction.update({
-  //       id: 790
-  //     }, {
-  //       where: {
-  //         provider: 'PAYTM'
-  //       }
-  //     }).then(data => {
-  //       expect(res).to.be.an
-  //       .instanceof(Models.Transaction)
-  //       done()
-  //     })
-  //   }).catch(done)
-  // })
+  it('Add money to wallet', (done) => {
+    wallet.initPayment(data.paymentInitData).then(res => {
+      Models.Transaction.update({
+        id: 790
+      }, {
+        where: {
+          provider: 'PAYTM'
+        }
+      }).then(data => {
+        expect(res).to.be.an
+        .instanceof(Models.Transaction)
+        done()
+      })
+    }).catch(done)
+  })
 
-  // it('validate paytm data', (done) => {
-  //   let paytmData = data.paytmValidData
-  //   wallet.validatePayment(paytmData).then(res => {
-  //     expect(res).to.be.an.instanceof(Models.Transaction)
-  //     expect(res).to.have.property('status', 'DONE')
-  //     done()
-  //   }).catch(done)
-  // })
+  it('validate paytm data', (done) => {
+    let paytmData = data.paytmValidData
+    wallet.validatePayment(paytmData).then(res => {
+      expect(res).to.be.an.instanceof(Models.Transaction)
+      expect(res).to.have.property('status', 'DONE')
+      done()
+    }).catch(done)
+  })
 
-  // it('Add money to wallet for failed txn status', (done) => {
-  //   wallet.initPayment(data.paymentInitData).then(res => {
-  //     Models.Transaction.update({id: 786}, 
-  //     {
-  //       where: {
-  //         provider: 'PAYTM',
-  //         status: 'INIT'
-  //       }
-  //     }).then(data => {
-  //       expect(res).to.be.an.instanceof(Models.Transaction)
-  //       done()
-  //     })
-  //   }).catch(done)
-  // })
+  it('Add money to wallet for failed txn status', (done) => {
+    wallet.initPayment(data.paymentInitData).then(res => {
+      Models.Transaction.update({id: 786}, 
+      {
+        where: {
+          provider: 'PAYTM',
+          status: 'INIT'
+        }
+      }).then(data => {
+        expect(res).to.be.an.instanceof(Models.Transaction)
+        done()
+      })
+    }).catch(done)
+  })
 
-  // it('Validate Failed data & wallet check', (done) => {
-  //   let paytmData = data.paytmValidFailedData
-  //   wallet.validatePayment(paytmData)
-  //   .then(res => {
-  //     wallet.balance({userId: userId})
-  //     .then(balance => {
-  //       expect(balance).to.have.property('amount', 10)
-  //       expect(res).to.be.an.instanceof(Models.Transaction)
-  //       expect(res).to.have.property('status', 'FAILED')
-  //       done()
-  //     }).catch(done)
-  //   }).catch(done)
-  // })
+  it('Validate Failed data & wallet check', (done) => {
+    let paytmData = data.paytmValidFailedData
+    wallet.validatePayment(paytmData)
+    .then(res => {
+      wallet.balance({userId: userId})
+      .then(balance => {
+        expect(balance).to.have.property('amount', 10)
+        expect(res).to.be.an.instanceof(Models.Transaction)
+        expect(res).to.have.property('status', 'FAILED')
+        done()
+      }).catch(done)
+    }).catch(done)
+  })
 })
 
-// describe('RazorPay Transactions', () => {
-//   let userId = data.users[0]
-//   let amount = 10
+describe('RazorPay Transactions', () => {
+  let userId = data.users[0]
+  let amount = 10
 
-//   it('Add money to wallet', (done) => {
-//     initData = data.paymentInitData
-//     initData.gateway = "RZP"
-//     wallet.initPayment(initData).then(res => {
-//       Models.Transaction.update({
-//         id: 792,
-//         orderId: 'order_FKjr1LOgNinOPl'
-//       }, {
-//         where: {
-//           provider: 'RZP'
-//         }
-//       }).then(data => {
-//         expect(res).to.be.an
-//         .instanceof(Models.Transaction)
-//         done()
-//       })
-//     }).catch(done)
-//   })
-
-//   it('validate paytm data', (done) => {
-//     let paytmData = data.rzpValidData
-//     wallet.validatePayment(paytmData).then(res => {
-//       expect(res).to.be.an.instanceof(Models.Transaction)
-//       expect(res).to.have.property('status', 'DONE')
-//       done()
-//     }).catch(done)
-//   })
-// })
-
-describe('Refunds', () => {
-  // it('Init RZP', (done) => {
-  //   initData = data.paymentInitData
-  //   initData.gateway = "RZP"
-  //   wallet.refund({
-  //     transactionId: "792",
-  //     userId: "d0e539b8-4c72-4c59-aefb-a7b5ed91616a",
-  //     amount: 10.00,
-  //     message: "hello"
-  //   }).then(res => {
-  //     expect(res).to.be.an.instanceof(Models.Transaction)
-  //     done()
-  //   }).catch(done)
-  // })
-
-  it('Init Paytm', (done) => {
+  it('Add money to wallet', (done) => {
     initData = data.paymentInitData
-    initData.gateway = "PAYTM"
-    wallet.refund({
-      transactionId: "795",
-      userId: "1",
-      amount: 10.00,
-      message: "hello"
-    }).then(res => {
+    initData.gateway = "RZP"
+    wallet.initPayment(initData).then(res => {
+      Models.Transaction.update({
+        id: 792,
+        orderId: 'order_FKjr1LOgNinOPl'
+      }, {
+        where: {
+          provider: 'RZP'
+        }
+      }).then(data => {
+        expect(res).to.be.an
+        .instanceof(Models.Transaction)
+        done()
+      })
+    }).catch(done)
+  })
+
+  it('validate paytm data', (done) => {
+    let paytmData = data.rzpValidData
+    wallet.validatePayment(paytmData).then(res => {
       expect(res).to.be.an.instanceof(Models.Transaction)
+      expect(res).to.have.property('status', 'DONE')
       done()
     }).catch(done)
   })
 })
+
+// describe('Refunds', () => {
+//   it('Init RZP', (done) => {
+//     initData = data.paymentInitData
+//     initData.gateway = "RZP"
+//     wallet.refund({
+//       transactionId: "792",
+//       userId: "d0e539b8-4c72-4c59-aefb-a7b5ed91616a",
+//       amount: 10.00,
+//       message: "hello"
+//     }).then(res => {
+//       expect(res).to.be.an.instanceof(Models.Transaction)
+//       done()
+//     }).catch(done)
+//   })
+
+//   it('Init Paytm', (done) => {
+//     initData = data.paymentInitData
+//     initData.gateway = "PAYTM"
+//     wallet.refund({
+//       transactionId: "795",
+//       userId: "1",
+//       amount: 10.00,
+//       message: "hello"
+//     }).then(res => {
+//       expect(res).to.be.an.instanceof(Models.Transaction)
+//       done()
+//     }).catch(done)
+//   })
+// })
 
 function _getWalletsByUserId (accounts) {
   return Models.Wallet.findAll({
