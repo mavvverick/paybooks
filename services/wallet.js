@@ -22,25 +22,30 @@ function get (req, res, next) {
 function create (req, res, next) {
   return wallet.create(req.body)
     .then(data => {
-      return res.json(resp(data))
+      return res.status(201).json(resp(data))
     }).catch(err => {
       next(error(err))
     })
 }
 
-function credit (req, res, next) {
+function transfer (req, res, next) {
+  //TO and from, business code
+  //TODO DEBIT CREDIT based on business logic
+}
+
+function creditNote (req, res, next) {
   return wallet.credit(req.body)
     .then(data => {
-      return res.json(resp(data, 201))
+      return res.status(201).json(resp(data, 201))
     }).catch(err => {
       next(error(err))
-    })
+  })
 }
 
-function debit (req, res, next) {
+function debitNote (req, res, next) {
   return wallet.debit(req.body)
     .then(data => {
-      return res.json(resp(data, 201))
+      return res.status(201).json(resp(data, 201))
     }).catch(err => {
       next(error(err))
     })
@@ -50,7 +55,7 @@ function debit (req, res, next) {
 function initPayment (req, res, next) {
   return wallet.initPayment(req.body)
     .then(data => {
-      return res.json(resp(data, 201))
+      return res.status(201).json(resp(data, 201))
     }).catch(err => {
       next(error(err))
     })
@@ -59,7 +64,7 @@ function initPayment (req, res, next) {
 function validatePayment (req, res, next) {
   return wallet.validatePayment(req.body)
     .then(data => {
-      return res.json(resp(data, 202))
+      return res.status(202).json(resp(data, 202))
     }).catch(err => {
       next(error(err))
     })
@@ -75,16 +80,23 @@ function refundPayment (req, res, next) {
 }
 
 
-function transferToWallet (req, res, next) {
+function withdrawal (req, res, next) {
 
 }
 
-function transferToAccount (req, res, next) {
-
+function transactions (req, res, next) {
+  req.params.start = req.query.start || 5
+  req.params.end = req.query.end || 0
+  return wallet.transactions(req.params)
+    .then(data => {
+      return res.json(resp(data))
+    }).catch(err => {
+      next(error(err))
+    })
 }
 
-function getTransactions (req, res, next) {
-  return wallet.transactions(req.body)
+function transactionsById (req, res, next) {
+  return wallet.transactionsById(req.params)
     .then(data => {
       return res.json(resp(data))
     }).catch(err => {
@@ -101,14 +113,15 @@ module.exports = {
   test,
   get,
   create,
-  credit,
-  debit,
+  transfer,
+  creditNote,
+  debitNote,
   initPayment,
   validatePayment,
-  refundPayment
-  transferToWallet,
-  transferToAccount,
-  getTransactions
+  refundPayment,
+  withdrawal,
+  transactions,
+  transactionsById
 }
 
 // const Wallet = require("../../batua/lib")

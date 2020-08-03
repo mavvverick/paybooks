@@ -1,17 +1,22 @@
 const express = require('express')
 const wallet = require('../services/wallet')
 const router = express.Router()
-const extractUser = require('../middleware/user')
+const decode = require('../middleware/decode')
 
-router.post('/hello', wallet.test)
 
 router.post('/', wallet.create)
 router.get('/:userId', wallet.get)
-router.post('/:userId/credit', extractUser, wallet.credit)
-router.post('/:userId/debit', extractUser, wallet.debit)
-router.post('/:userId/note', extractUser, wallet.create)
-router.post('/:userId/payments/init', extractUser, wallet.initPayment)
-router.post('/:userId/payments/:transactionId/vaildate', extractUser, wallet.validatePayment)
-router.post('/:userId/payments/:transactionId/refund', extractUser, wallet.refundPayment)
+router.get('/:userId/transactions', wallet.transactions)
+router.get('/:userId/transactions/:transactionId', wallet.transactionsById)
+
+router.post('/transfers', decode, wallet.transfer)
+router.post('/notes/credit',decode, wallet.creditNote)
+router.post('/notes/debit',decode,  wallet.debitNote)
+router.post('/payments/init',decode, wallet.initPayment)
+router.post('/payments/vaildate', wallet.validatePayment)
+router.post('/payments/refund', wallet.refundPayment)
+
+router.post('/hello', wallet.test)
+
 
 module.exports = router

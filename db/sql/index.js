@@ -1,53 +1,62 @@
 'use strict'
 require('dotenv').config()
 
-const fs = require('fs')
-const path = require('path')
-const Sequelize = require('sequelize')
-const basename = path.basename(__filename)
-// const env = process.env.NODE_ENV || 'development'
-// const config = require('../config/config.json')[env]
-const db = {}
+const fs = require('fs');
+const path = require('path');
+const { Sequelize, DataTypes } = require('sequelize');
 
-// if (config.use_env_constiable) {
-//   var sequelize = new Sequelize(JSON.parse(process.env[config.use_env_constiable]));
-// } else {
-//   var sequelize = new Sequelize(config.database, config.username, config.password, config);
-// }
+const filebasename = path.basename(__filename);
+const db = {};
 
-const sequelize = new Sequelize(process.env.sequelize_db, process.env.sequelize_user, process.env.sequelize_pass, {
-  host: process.env.sequelize_host,
-  dialect: 'mysql',
-  logging: false
-})
+const { DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_FORCE_RESTART } = process.env;
+
+const config = {
+host: DB_HOST,
+dialect: 'mysql',
+dialectOptions: {
+  charset: 'utf8',
+},
+logging: false
+}
+
+
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, config);
 
 fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js')
-  })
-  .forEach(file => {
-    const model = sequelize.import(path.join(__dirname, file))
-    db[model.name] = model
-  })
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db)
-  }
+.readdirSync(__dirname)
+.filter((file) => {
+const returnFile = (file.indexOf('.') !== 0)
+&& (file !== filebasename)
+&& (file.slice(-3) === '.js');
+return returnFile;
 })
+.forEach((file) => {
+const model = require(path.join(__dirname, file))(sequelize, DataTypes)
+db[model.name] = model;
+});
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Connection has been established successfully.')
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err)
-  })
+Object.keys(db).forEach((modelName) => {
+if (db[modelName].associate) {
+db[modelName].associate(db);
+}
+});
 
-sequelize.sync()
-db.sequelize = sequelize
-db.Sequelize = Sequelize
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
-module.exports = db
+const sequelizeOptions = { 
+  logging: console.log, 
+};
+
+// Removes all tables and recreates them (only available if env is not in production)
+if (DB_FORCE_RESTART === 'true' && process.env.ENV !== 'production') {
+sequelizeOptions.force = true;
+}
+
+// sequelize.sync(sequelizeOptions)
+// .catch((err) => {
+// console.log(err);
+// process.exit();
+// });
+
+module.exports = db;

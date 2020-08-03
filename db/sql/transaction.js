@@ -8,12 +8,76 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     userId: DataTypes.STRING,
+    to: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 0
+    },
+    from: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 0
+    },
     orderId: DataTypes.STRING,
-    amount: DataTypes.FLOAT,
-    tax: DataTypes.FLOAT,
-    fee: DataTypes.FLOAT,
+    amount: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
+    refundAmount: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
+    tax: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
+    sgst:{
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
+    cgst: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
+    igst: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
+    fee: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0.00,
+      validate: {
+        min: 0.00
+      }
+    },
     meta: DataTypes.STRING,
     note: DataTypes.STRING,
+    extra: DataTypes.STRING,
     refund: DataTypes.STRING,
     app: {
       type: DataTypes.STRING(20),
@@ -34,11 +98,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM,
       values: ['DR', 'CR']
     },
-    category: {
-      type: DataTypes.ENUM,
-      values: ['DEPOSIT', 'WITHDRAWAL', 'REFER', 'CASHBACK',
-        'COMMISSION', 'NOTE', 'REFUND', 'BOOKING', 'GATEWAY']
-    },
+    code: DataTypes.STRING,
     status: {
       type: DataTypes.ENUM,
       values: [
