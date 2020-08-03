@@ -14,7 +14,7 @@ RUN npm install
 
 #Stage 2
 From node:8.11.4-alpine
-EXPOSE 8080
+EXPOSE 8000
 
 COPY --from=builder /workspace /workspace
 WORKDIR /workspace
@@ -25,4 +25,4 @@ RUN npm install -g pm2
 CMD [ "pm2-docker", "process.json"]
 
 # docker build --build-arg BUILD_TOKEN=<your access token> .
-# docker run --name yolo --env-file=env -p 8080:8080 registry.gitlab.com/pathfinder-19n33w/yolo:latest
+# docker run --name yolo --env-file=env -p 8080:8080 630248392506.dkr.ecr.ap-south-1.amazonaws.com/app/paybooks:latest

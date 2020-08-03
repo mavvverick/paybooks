@@ -53,6 +53,28 @@ function getDataByCode (codes) {
   })
 }
 
+function getAccess (secret) {
+  key = `ac-${secret}`
+  if (lruCache.peek(key)) {
+    return lruCache.get(key)
+  }
+
+  return sql.Access.findOne({
+    where: {
+      secret: secret
+    },
+    attributes: ['level']
+  }).then(access => {
+    if(access){
+      accessLevel = access.toJSON()
+      lruCache.set(key, accessLevel.level)
+      return accessLevel.level
+    }
+    return false
+  })
+}
+
+
 function calcTax(amount, taxPerct){
   return (taxPerct * amount) / 100
 }
@@ -61,5 +83,6 @@ function calcTax(amount, taxPerct){
 module.exports = {
   getSgstByState,
   getDataByCode,
-  calcTax
+  calcTax,
+  getAccess
 }

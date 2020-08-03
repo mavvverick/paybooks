@@ -124,6 +124,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
+  Wallet.associate = (models) => {
+    Wallet.hasMany(models.Book, { 
+      foreignKey: 'wId'
+    });
+  }
+
   return Wallet
 }
 

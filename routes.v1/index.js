@@ -4,6 +4,7 @@ const walletRoutes = require('./wallet')
 const codeRoutes = require('./code')
 const taxRoutes = require('./tax')
 const heimdall = require('../middleware/heimdall')
+const access = require('../middleware/access')
 
 /** GET /health-check - Check service health */
 router.get('/health-check', (req, res) =>
@@ -17,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
   authMiddleware = heimdall.dummyUser
 }
 
-router.use('/wallets', authMiddleware, walletRoutes)
+router.use('/wallets', access, walletRoutes)
 router.use('/codes', authMiddleware, codeRoutes)
 router.use('/taxes', authMiddleware, taxRoutes)
 module.exports = router

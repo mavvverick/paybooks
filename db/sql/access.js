@@ -8,12 +8,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
     },
     secret: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-        defaultValue: 0.00,
-        validate: {
-          min: 0.00
-        }
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    level: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     isActive: {
       type: DataTypes.BOOLEAN,

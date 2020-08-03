@@ -55,8 +55,8 @@ sequelizeOptions.force = true;
 
 // sequelize.sync(sequelizeOptions)
 // .catch((err) => {
-// console.log(err);
-// process.exit();
+//   console.log(err);
+//   process.exit();
 // });
 
 module.exports = db;

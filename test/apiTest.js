@@ -29,23 +29,35 @@ describe('Wallet', () => {
     it('Flush db', (done) => {
         function clearDB() {
             let count = 0
-            var promises = [
-                Models.Wallet.destroy({
-                    truncate: true
-                }),
-                Models.Transaction.destroy({
-                    truncate: true
-                }),
-                data.accounts.forEach(account => {
-                  wallet.create(account)
-                }),
-                Models.Wallet.update({
-                    amount: 1000.00
-                },{ where: {amount: {[Op.lt]: 1} }})
-            ];
-            Promise.all(promises)
-            .then(function () {
-                done();
+            Models.sequelize.transaction(function(t) {
+                var options = { raw: true, transaction: t }
+                return Models.sequelize
+                    .query('SET FOREIGN_KEY_CHECKS = 0', options)
+                    .then(function() {
+                    let raw = [ 
+                        Models.sequelize.query('truncate table Books', options),
+                        Models.sequelize.query('truncate table Wallets', options),
+                        Models.sequelize.query('truncate table Transactions', options)
+                    ]
+                    return Promise.all(raw)
+                    })
+                    .then(function() {
+                    return Models.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', options)
+                })
+            }).then(function() {
+                var promises = [
+                    data.accounts.forEach(account => {
+                      wallet.create(account)
+                    }),
+                    Models.Wallet.update({
+                        amount: 1000.00
+                    },{ where: {amount: {[Op.lt]: 1} }})
+                ];
+    
+                Promise.all(promises)
+                .then(function () {
+                        done();
+                }).catch(done)
             })
         }
         clearDB()

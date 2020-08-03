@@ -29,7 +29,7 @@ const auth = (req, res, next) => {
           const payload = accessData.payload
           req.user = {}
           req.user.userId = payload.sub
-          req.user.phNumber = payload.phNumber
+          req.user.phoneNumber = payload.phoneNumber
           req.user.isAgent = payload.isAgent
           next()
         } else return next(error(401, err))

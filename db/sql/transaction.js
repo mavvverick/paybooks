@@ -107,9 +107,29 @@ module.exports = (sequelize, DataTypes) => {
       ],
       defaultValue: 'INIT'
     }
-  }, {
-  // paranoid: true
   })
+
+  Transaction.afterCreate(async(transaction, options) => {
+    if(transaction.provider === 'SELF'){
+      // TODO ADD BOOK keeping
+      console.log("Created ", transaction.provider)
+    }
+  });
+
+  Transaction.afterUpdate(async(transaction, options) => {
+    if(transaction.provider === 'PAYTM' || transaction.provider === 'RZP'){
+      // TODO ADD BOOK keeping
+      console.log("SAVED ", transaction.provider)
+    }
+  });
+  
+
   Transaction.belongsTo(Transaction, { as: 'Parent', foreignKey: 'linkId' })
+  Transaction.associate = (models) => {
+    Transaction.hasMany(models.Book,{ 
+      foreignKey: 'tId'
+    });
+  }
+
   return Transaction
 }
