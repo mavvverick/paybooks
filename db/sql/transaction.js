@@ -109,17 +109,61 @@ module.exports = (sequelize, DataTypes) => {
     }
   })
 
-  Transaction.afterCreate(async(transaction, options) => {
+  Transaction.afterCreate((transaction, options) => {
     if(transaction.provider === 'SELF'){
-      // TODO ADD BOOK keeping
-      console.log("Created ", transaction.provider)
+      let data = [{
+          tId: transaction.id,
+          wId: parseInt(transaction.from),
+          amount: transaction.amount,
+          type: "DR",
+          meta: transaction.meta
+      },{
+        tId: transaction.id,
+        wId: parseInt(transaction.to),
+        type: "CR",
+        amount: transaction.amount,
+        meta: transaction.meta
+      }]
+
+      return new Promise((resolve, reject) => {
+       return  transaction.sequelize.models.Book.bulkCreate(data,{
+          transaction: options.transaction
+        }).then((foundedInstace, err)=>{
+            resolve("done");
+        }).catch(err => {
+          reject('Can not add entry in Books');
+        });
+      });
+
     }
   });
 
   Transaction.afterUpdate(async(transaction, options) => {
     if(transaction.provider === 'PAYTM' || transaction.provider === 'RZP'){
-      // TODO ADD BOOK keeping
       console.log("SAVED ", transaction.provider)
+      let data = [{
+        tId: transaction.id,
+        wId: parseInt(transaction.from),
+        amount: transaction.amount,
+        type: "DR",
+        meta: transaction.meta
+      },{
+        tId: transaction.id,
+        wId: parseInt(transaction.to),
+        type: "CR",
+        amount: transaction.amount,
+        meta: transaction.meta
+      }]
+
+      return new Promise((resolve, reject) => {
+        return  transaction.sequelize.models.Book.bulkCreate(data,{
+            transaction: options.transaction
+          }).then((foundedInstace, err)=>{
+              resolve("done");
+          }).catch(err => {
+            reject('Can not add entry in Books');
+          });
+      }); 
     }
   });
   
